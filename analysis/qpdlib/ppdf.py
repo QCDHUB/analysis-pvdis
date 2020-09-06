@@ -1,0 +1,381 @@
+import sys, os
+import numpy as np
+import copy
+from subprocess import Popen, PIPE, STDOUT
+
+import matplotlib
+matplotlib.use('Agg')
+import pylab as py
+
+## from fitpack tools
+from tools.tools     import load, save, checkdir, lprint
+from tools.config    import conf, load_config
+
+## from fitpack fitlib
+from fitlib.resman import RESMAN
+
+## from fitpack analysis
+from analysis.corelib import core
+from analysis.corelib import classifier
+
+
+flavors = []
+flavors.append('up')
+flavors.append('dp')
+flavors.append('sp')
+flavors.append('g')
+
+def gen_xf(wdir,Q2 = 1.27**2):
+    load_config('%s/input.py' % wdir)
+    istep = core.get_istep()
+
+    replicas = core.get_replicas(wdir)
+    ## 'conf' will be modified for each replica individually later in the loop over 'replicas'
+    ## the reason for doing this is that 'fix parameters' has to be set correctly for each replica
+
+    if 'ppdf' not in conf['steps'][istep]['active distributions']:
+        print('ppdf-proton not in active distribution')
+        return
+
+    resman = RESMAN(nworkers = 1, parallel = False, datasets = False)
+    parman = resman.parman
+    parman.order = replicas[0]['order'][istep]
+
+    ppdf = conf['ppdf']
+
+    ## setup kinematics
+    X = 10.0 ** np.linspace(-3, -1, 100)
+    X = np.append(X, np.linspace(0.1, 0.99, 100))
+    if Q2 == None: Q2 = conf['Q20']
+    print('\ngenerating polarized pdf-proton from %s at Q2 = %f' % (wdir, Q2))
+
+    ## compute XF for all replicas
+    XF = {}
+    n_replicas = len(replicas)
+    for i in range(n_replicas):
+        lprint('%d/%d' % (i + 1, n_replicas))
+
+        core.mod_conf(istep, replicas[i])
+        parman.set_new_params(replicas[i]['params'][istep], initial = True)
+
+        for flavor in flavors:
+            if flavor not in XF: XF[flavor] = []
+            if flavor == 'up':
+                func = lambda x: ppdf.get_xF(x, Q2, 'u') + ppdf.get_xF(x, Q2, 'ub')
+            elif flavor == 'dp':
+                func = lambda x: ppdf.get_xF(x, Q2, 'd') + ppdf.get_xF(x, Q2, 'sb')
+            elif flavor == 'sp':
+                func = lambda x: ppdf.get_xF(x, Q2, 's') + ppdf.get_xF(x, Q2, 'sb')
+            else:
+                func = lambda x: ppdf.get_xF(x, Q2, flavor)
+
+            XF[flavor].append([func(x) for x in X])
+    print
+    checkdir('%s/data' % wdir)
+    if Q2 == conf['Q20']:
+        save({'X': X, 'Q2': Q2, 'XF': XF}, '%s/data/ppdf-%d.dat' % (wdir, istep))
+    else:
+        save({'X': X, 'Q2': Q2, 'XF': XF}, '%s/data/ppdf-%d-Q2=%d.dat' % (wdir, istep, int(Q2)))
+        
+def plot_xf_main(PLOT,kc,mode=0,name='',PSETS=[],cmap=False):
+  #--mode 0: plot each replica
+  #--mode 1: plot average and standard deviation of replicas 
+
+  #--get PPDF sets for comparison
+  #for SET in PSETS:
+  #    if SET=='CJ15':   CJ15   = QPDCALC('CJ15nlo',ismc=False) 
+  #    if SET=='JAM19':  JAM19  = QPDCALC('JAM19PDF_proton_nlo',ismc=True)
+  #    if SET=='ABMP16': ABMP16 = QPDCALC('ABMP16_3_nlo',ismc=False)
+  #    if SET=='CSKK':   CSKK   = QPDCALC('CSKK_nnlo_EIG',ismc=False)
+  #    if SET=='NNPDF':  NNPDF  = QPDCALC('NNPDF31_nlo_as_0118',ismc=False)
+  #    if SET=='MMHT':   MMHT   = QPDCALC('MMHT2014nlo68cl',ismc=False)
+
+  nrows,ncols=2,2
+  fig = py.figure(figsize=(ncols*6,nrows*4))
+  ax11=py.subplot(nrows,ncols,1)
+  ax12=py.subplot(nrows,ncols,2)
+  ax21=py.subplot(nrows,ncols,3)
+  ax22=py.subplot(nrows,ncols,4)
+
+  filename = '%s/gallery/ppdfs'%PLOT[0][0]
+
+  filename += name
+
+  j = 0
+  for plot in PLOT:
+
+      wdir, Q2, color, style, label = plot[0], plot[1], plot[2], plot[3], plot[4]
+      load_config('%s/input.py'%wdir)
+      istep=core.get_istep()
+
+      if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+      else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+
+      replicas=core.get_replicas(wdir)
+      #--colormap of chi2
+      if cmap: colors = classifier.get_cmap(wdir,'cool',len(replicas))
+      else:
+          cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+          best_cluster=cluster_order[0]
+
+      X=data['X']
+
+      for flav in data['XF']:
+          mean = np.mean(data['XF'][flav],axis=0)
+          std = np.std(data['XF'][flav],axis=0)
+
+          if flav=='up': ax = ax11
+          if flav=='dp': ax = ax12
+          if flav=='sp': ax = ax21
+          if flav=='g' : ax = ax22
+
+          #--plot each replica
+          if mode==0:
+              for i in range(len(data['XF'][flav])):
+                  #--if plotting one step, use clusters
+                  if cmap: color = colors[i]
+                  else:
+                      if len(PLOT) == 1: color = colors[cluster[i]]
+                  ax.plot(X,data['XF'][flav][i],color=color,alpha=0.5)
+        
+          #--plot average and standard deviation
+          if mode==1:
+              ax.plot(X,mean,style,label=label,color=color)
+              ax.fill_between(X,mean-std,mean+std,color=color,alpha=0.2)
+
+          #--plot other PPDF sets
+          #if j==0:
+          #    for SET in SETS:
+          #        _set,_label = None,None
+          #        if SET=='CJ15':  
+          #            _set,_color,alpha=CJ15,'gray', 0.3
+          #            if flav=='uv': _label = 'CJ15'
+          #        if SET=='JAM19': 
+          #            _set,_color,alpha=JAM19,'magenta',0.5
+          #            if flav=='uv': _label = 'JAM19'
+          #        if SET=='ABMP16': 
+          #            _set,_color,alpha=ABMP16,'blue',0.5
+          #            if flav=='d/u': _label = 'ABMP16'
+          #        if SET=='CSKK':
+          #            _set,_color,alpha=CSKK,'green',0.3
+          #            if flav=='d/u': _label = 'CSKK'
+          #        if SET=='NNPDF':
+          #            _set,_color,alpha=NNPDF,'yellow',0.5
+          #            if flav=='g': _label = 'NNPDF3.1'
+          #        if SET=='MMHT':
+          #            _set,_color,alpha=MMHT,'pink',0.5
+          #            if flav=='g': _label = 'MMHT14'
+          #        pdf = _set.get_xpdf(flav,X,Q2)
+          #        ax.fill_between(X,pdf['xfmin'], pdf['xfmax'],label=_label,color=_color,alpha=alpha)
+
+          #    if flav=='uv':  ax.legend(loc='upper left' ,fontsize=20,frameon=False)
+          #    if flav=='d/u': ax.legend(loc='upper right',fontsize=20,frameon=False)
+          #    if flav=='g':   ax.legend(loc='upper right',fontsize=20,frameon=False)
+
+      j+=1
+
+
+  for ax in [ax11,ax12,ax21,ax22]:
+        ax.set_xlim(8e-3,1)
+        ax.semilogx()
+          
+        ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=20)
+        ax.set_xticks([0.01,0.1,0.5,0.8])
+        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
+
+  ax11.set_ylim(0.0,0.6)   ,ax11.set_yticks([0,0.1,0.2,0.3,0.4,0.5])
+  ax12.set_ylim(-0.2,0.0)    ,ax12.set_yticks([0,-0.05,-0.10,-0.15,-0.20])
+  ax21.set_ylim(-0.10,0.05),ax21.set_yticks([-0.08,-0.04,0.00,0.04])
+  ax22.set_ylim(-0.6,0.4)  ,ax22.set_yticks([-0.6,-0.4,-0.2,0,0.2,0.4])
+
+  ax21.axhline(0,color='k',linestyle=':')
+  ax22.axhline(0,color='k',linestyle=':')
+
+  ax11.set_ylabel(r'$xf(x)$',size=25)
+  ax21.set_ylabel(r'$xf(x)$',size=25)
+  ax21.set_xlabel(r'$x$',size=25)
+  ax22.set_xlabel(r'$x$',size=25)   
+
+  ax11.text(0.3,0.5,r'\boldmath{$x \Delta u^+$}', transform=ax11.transAxes,size=25)
+  #ax11.text(0.25,0.75,r'\boldmath{$Q^2 = m_c^2$}', transform=ax11.transAxes,size=30)
+
+  ax12.text(0.2,0.3,r'\boldmath{$x \Delta d^+$}', transform=ax12.transAxes,size=25)
+
+  ax21.text(0.7,0.8,r'\boldmath{$x \Delta s^+$}', transform=ax21.transAxes,size=25)
+
+  ax22.text(0.1,0.85,r'\boldmath{$x \Delta g$}',  transform=ax22.transAxes,size=25)
+
+ 
+  py.tight_layout()
+  py.subplots_adjust(top=0.92)
+  py.subplots_adjust(bottom=0.15)
+
+  filename+='.png'
+
+  checkdir('%s/gallery'%wdir)
+  py.savefig(filename)
+  print 'Saving figure to %s'%filename
+
+def plot_xf_strange(PLOT,kc,mode=0,name=''):
+  #--mode 0: plot each replica
+  #--mode 1: plot average and standard deviation of replicas 
+
+  nrows,ncols=1,1
+  fig = py.figure(figsize=(ncols*6,nrows*4))
+  ax11=py.subplot(nrows,ncols,1)
+
+  filename = '%s/gallery/ppdfs-strange'%PLOT[0][0]
+
+  filename += name
+
+  j = 0
+  for plot in PLOT:
+
+      wdir, Q2, color, style, label = plot[0], plot[1], plot[2], plot[3], plot[4]
+      load_config('%s/input.py'%wdir)
+      istep=core.get_istep()
+
+      if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+      else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+
+      replicas=core.get_replicas(wdir)
+      cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+      best_cluster=cluster_order[0]
+
+      X=data['X']
+
+      for flav in data['XF']:
+          mean = np.mean(data['XF'][flav],axis=0)
+          std = np.std(data['XF'][flav],axis=0)
+
+          if flav=='sp': ax = ax11
+          else: continue
+
+          #--plot each replica
+          if mode==0:
+              for i in range(len(data['XF'][flav])):
+                  #--if plotting one step, use clusters
+                  if len(PLOT) == 1: color = colors[cluster[i]]
+                  ax.plot(X,data['XF'][flav][i],color=color,alpha=0.5)
+        
+          #--plot average and standard deviation
+          if mode==1:
+              ax.plot(X,mean,style,label=label,color=color)
+              ax.fill_between(X,mean-std,mean+std,color=color,alpha=0.2)
+
+      j+=1
+
+
+  for ax in [ax11]:
+        ax.set_xlim(8e-3,1)
+        ax.semilogx()
+          
+        ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=20)
+        ax.set_xticks([0.01,0.1,0.5,0.8])
+        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
+
+  ax11.set_ylim(-0.10,0.05),ax11.set_yticks([-0.08,-0.04,0.00,0.04])
+
+  ax11.axhline(0,color='k',linestyle=':')
+
+  ax11.set_ylabel(r'$xf(x)$',size=30)
+  ax11.set_xlabel(r'$x$',size=30)
+
+  ax11.text(0.05,0.05,r'\boldmath{$x \Delta s^+$}', transform=ax11.transAxes,size=25)
+
+ 
+  py.tight_layout()
+
+  filename+='.png'
+
+  checkdir('%s/gallery'%wdir)
+  py.savefig(filename)
+  print 'Saving figure to %s'%filename
+
+def plot_xf_strange_std(PLOT,kc,name=''):
+  #--mode 0: plot each replica
+  #--mode 1: plot average and standard deviation of replicas 
+
+  nrows,ncols=1,1
+  fig = py.figure(figsize=(ncols*6,nrows*4))
+  ax11=py.subplot(nrows,ncols,1)
+
+  filename = '%s/gallery/ppdfs-strange-std'%PLOT[0][0]
+
+  filename += name
+
+  j = 0
+  for plot in PLOT:
+
+      wdir, Q2, color, style, label = plot[0], plot[1], plot[2], plot[3], plot[4]
+      load_config('%s/input.py'%wdir)
+      istep=core.get_istep()
+
+      if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+      else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+
+      replicas=core.get_replicas(wdir)
+      cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+      best_cluster=cluster_order[0]
+
+      X=data['X']
+
+      for flav in data['XF']:
+          mean = np.mean(data['XF'][flav],axis=0)
+          std = np.std(data['XF'][flav],axis=0)
+
+          if flav=='sp': ax = ax11
+          else: continue
+
+          #--plot standard deviation over mean
+          ax.plot(X,np.abs(std/mean),style,label=label,color=color)
+
+      j+=1
+
+
+  for ax in [ax11]:
+        ax.set_xlim(8e-3,1)
+        ax.semilogx()
+          
+        ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=20)
+        ax.set_xticks([0.01,0.1,0.5,0.8])
+        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
+
+  ax11.set_ylim(0,1.2)#,ax11.set_yticks([-0.08,-0.04,0.00,0.04])
+
+  ax11.set_ylabel(r'$\delta_{\Delta s^+}/\Delta s^+$',size=30)
+  ax11.set_xlabel(r'$x$',size=30)
+
+  if len(PLOT) > 1: ax11.legend(loc=(0.02,0.2), fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+  py.tight_layout()
+
+  filename+='.png'
+
+  checkdir('%s/gallery'%wdir)
+  py.savefig(filename)
+  print 'Saving figure to %s'%filename
+
+def plot_xf(PLOT,kc,mode=0,name='',PSETS=[],cmap=False):
+
+    plot_xf_main(PLOT,kc,mode,name,PSETS,cmap)
+    plot_xf_strange(PLOT,kc,mode,name)
+    plot_xf_strange_std(PLOT,kc,name)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
