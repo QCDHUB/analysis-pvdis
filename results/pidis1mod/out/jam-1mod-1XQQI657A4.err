@@ -1,2 +1,0 @@
-/work/JAM/ccocuzza/fitpack/obslib/pjets/pjet_mellin.py:2420: RuntimeWarning: invalid value encountered in log
-  pjet_parameters = splrep(np.log(baseline_pts), np.log(baseline_pjet_sigmas))
