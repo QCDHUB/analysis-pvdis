@@ -95,27 +95,26 @@ mode = 0
 tar   = 'h'
 force = False
 
-stf_sim.stf(wdir,tar=tar,force=force)
+#stf_sim.stf(wdir,tar=tar,force=force)
 
 #########################
 ##--Simulation for PVDIS
 #########################
 kind  = 'had'
 tar   = 'p'
-est   = 'mod'
+est   = 'opt'
 lum   = '100:fb-1'
-force = False
+force = True
 
 #pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,lum=lum,force=force)
-
 
 ######################
 ##--Initial Processing
 ######################
 FILT = []
-#FILT.append(('dv1 b',5.6,'greater'))
+FILT.append(('g1 N',-2.0,'less'))
 
-#inspect.get_msr_inspected(wdir,limit=2.0,FILT=FILT)
+#inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
 #predict.get_predictions(wdir,force=False)
 #classifier.gen_labels(wdir,kc)
 #jar.gen_jar_file(wdir,kc)
@@ -127,29 +126,11 @@ FILT = []
 
 #optpriors.gen_priors(wdir,kc,10)
 
-###################
-##--Data generation
-###################
-
-#stf.gen_stf(wdir,Q2)
-#stf.gen_CCstf(wdir,Q2)
-
-########################
-##--Plot dis metrics
-########################
-compare = False
-
-#stf.plot_stf(wdir,Q2,kc,mode,name=name)
-#stf.plot_rat(PLOT,kc,mode,name=name,nrep=nrep)
-#stf.plot_CCstf(wdir,Q2,kc,mode,name=name)
-#off.plot_off(PLOT,kc,mode,iso=True,name=name,nrep=nrep,compare=compare)
-#ht.plot_ht(PLOT,kc,mode,name=name,nrep=nrep)
-
 ########################
 ##--Plot sin2w
 ########################
 
-#sin2w.plot_sin2w(PLOT,kc,mode=0,name=name,nrep=nrep)
+#sin2w.plot_sin2w(PLOT,kc,mode=1,name=name,nrep=nrep)
 
 ###################
 #--Plot proton pdfs
@@ -161,35 +142,22 @@ SETS = []
 #SETS.append('NNPDF')
 
 #pdf.gen_xf(wdir,Q2)         
-#pdf.plot_xf(PLOT,kc,mode,name=name,SETS=SETS)                
+#pdf.plot_xf(PLOT,kc,kind=0,mode=mode,name=name,SETS=SETS)
 
 ###########################
 ##--Parameter distributions
 ###########################
-hist=True
+hist=False
 
 #params.plot_params(wdir,'pdf',kc,hist)
-#params.plot_params(wdir,'ht4',kc,hist)
-#params.plot_params(wdir,'off',kc,hist)
 
 ####################
 ##--Observable plots
 ####################
 
-#idis.plot_obs(wdir,kc,plot_HERA=True)
-#dy.plot_obs(wdir,kc,ratio=ratio)
-#zrap.plot_zrap(wdir)
-#wasym.plot_wasym(wdir,kc)
-#wzrv.plot_wzrv(wdir)
 #pvdis.plot_obs(wdir,kc,'e')
 #pvdis.plot_obs(wdir,kc,'had')
 
-
-############################
-##--Plot all data points
-############################
-
-#data.plot_data()
 
 ##---------------------------------------------------------------
 ##--Polarized
@@ -202,13 +170,7 @@ hist=True
 PSETS = []
 
 #ppdf.gen_xf(wdir,Q2=Q2)         
-#ppdf.plot_xf(PLOT,kc,mode=0,name='',PSETS=PSETS)
-
-########################
-#--polarized observables
-########################
-    
-##AL.plot_A_L(wdir,kc)
+ppdf.plot_xf(PLOT,kc,mode=0,name='',PSETS=PSETS)
 
 ###########################
 ##--Parameter distributions
