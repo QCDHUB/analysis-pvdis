@@ -6,6 +6,7 @@ import pandas as pd
 import copy
 
 #--from tools
+from tools           import config
 from tools.tools     import load,save,checkdir,lprint
 from tools.config    import conf,load_config
 from tools.inputmod  import INPUTMOD
@@ -136,14 +137,14 @@ def get_replicas(wdir,mod_conf=None):
     if mod_conf == None:
         load_config('%s/input.py'%wdir)
     else:
-        conf = copy.deepcopy(mod_conf)
+        config.conf = copy.deepcopy(mod_conf)
 
     istep = get_istep()
     if 'passive distributions' in conf['steps'][istep]:
        dep = conf['steps'][istep]['dep']
        for step in dep:
-           prior_order = replicas[0]['order'][step]
            for j in range(len(replicas)):
+               prior_order = replicas[j]['order'][step]
                for i in range(len(prior_order)):
                    if prior_order[i] not in replicas[j]['order'][istep]:
                        replicas[j]['order'][istep].append(prior_order[i])

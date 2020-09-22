@@ -44,7 +44,7 @@ def gen_xf(wdir,Q2 = 1.27**2):
     ppdf = conf['ppdf']
 
     ## setup kinematics
-    X = 10.0 ** np.linspace(-3, -1, 100)
+    X = 10.0 ** np.linspace(-6, -1, 100)
     X = np.append(X, np.linspace(0.1, 0.99, 100))
     if Q2 == None: Q2 = conf['Q20']
     print('\ngenerating polarized pdf-proton from %s at Q2 = %f' % (wdir, Q2))
@@ -176,39 +176,39 @@ def plot_xf_main(PLOT,kc,mode=0,name='',PSETS=[],cmap=False):
 
 
   for ax in [ax11,ax12,ax21,ax22]:
-        ax.set_xlim(8e-3,1)
+        ax.set_xlim(1e-4,1)
         ax.semilogx()
           
         ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=20)
-        ax.set_xticks([0.01,0.1,0.5,0.8])
-        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
+        #ax.set_xticks([0.01,0.1,0.5,0.8])
+        #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
 
-  ax11.set_ylim(0.0,0.6)   ,ax11.set_yticks([0,0.1,0.2,0.3,0.4,0.5])
-  ax12.set_ylim(-0.2,0.0)    ,ax12.set_yticks([0,-0.05,-0.10,-0.15,-0.20])
+  ax11.set_ylim(0.0,0.5)   ,ax11.set_yticks([0,0.1,0.2,0.3,0.4,0.5])
+  ax12.set_ylim(-0.2,0.0)  ,ax12.set_yticks([0,-0.05,-0.10,-0.15,-0.20])
   ax21.set_ylim(-0.10,0.05),ax21.set_yticks([-0.08,-0.04,0.00,0.04])
-  ax22.set_ylim(-0.6,0.4)  ,ax22.set_yticks([-0.6,-0.4,-0.2,0,0.2,0.4])
+  ax22.set_ylim(-0.2,0.4)  ,ax22.set_yticks([-0.2,0,0.2,0.4])
 
   ax21.axhline(0,color='k',linestyle=':')
   ax22.axhline(0,color='k',linestyle=':')
 
-  ax11.set_ylabel(r'$xf(x)$',size=25)
-  ax21.set_ylabel(r'$xf(x)$',size=25)
+  #ax11.set_ylabel(r'$xf(x)$',size=25)
+  #ax21.set_ylabel(r'$xf(x)$',size=25)
   ax21.set_xlabel(r'$x$',size=25)
   ax22.set_xlabel(r'$x$',size=25)   
 
   ax11.text(0.3,0.5,r'\boldmath{$x \Delta u^+$}', transform=ax11.transAxes,size=25)
-  #ax11.text(0.25,0.75,r'\boldmath{$Q^2 = m_c^2$}', transform=ax11.transAxes,size=30)
+
+  if Q2 == 1.27**2: ax22.text(0.05,0.05,r'$Q^2 = m_c^2$',              transform=ax22.transAxes,size=30)
+  else:             ax22.text(0.05,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax22.transAxes,size=30)
 
   ax12.text(0.2,0.3,r'\boldmath{$x \Delta d^+$}', transform=ax12.transAxes,size=25)
 
-  ax21.text(0.7,0.8,r'\boldmath{$x \Delta s^+$}', transform=ax21.transAxes,size=25)
+  ax21.text(0.1,0.1,r'\boldmath{$x \Delta s^+$}', transform=ax21.transAxes,size=25)
 
   ax22.text(0.1,0.85,r'\boldmath{$x \Delta g$}',  transform=ax22.transAxes,size=25)
 
  
   py.tight_layout()
-  py.subplots_adjust(top=0.92)
-  py.subplots_adjust(bottom=0.15)
 
   filename+='.png'
 
@@ -267,12 +267,12 @@ def plot_xf_strange(PLOT,kc,mode=0,name=''):
 
 
   for ax in [ax11]:
-        ax.set_xlim(8e-3,1)
+        ax.set_xlim(1e-4,1)
         ax.semilogx()
           
         ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=20)
-        ax.set_xticks([0.01,0.1,0.5,0.8])
-        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
+        #ax.set_xticks([0.01,0.1,0.5,0.8])
+        #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
 
   ax11.set_ylim(-0.10,0.05),ax11.set_yticks([-0.08,-0.04,0.00,0.04])
 
@@ -334,12 +334,12 @@ def plot_xf_strange_std(PLOT,kc,name=''):
 
 
   for ax in [ax11]:
-        ax.set_xlim(8e-3,1)
+        ax.set_xlim(1e-4,1)
         ax.semilogx()
           
         ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=20)
-        ax.set_xticks([0.01,0.1,0.5,0.8])
-        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
+        #ax.set_xticks([0.01,0.1,0.5,0.8])
+        #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
 
   ax11.set_ylim(0,1.2)#,ax11.set_yticks([-0.08,-0.04,0.00,0.04])
 
@@ -355,11 +355,126 @@ def plot_xf_strange_std(PLOT,kc,name=''):
   py.savefig(filename)
   print 'Saving figure to %s'%filename
 
-def plot_xf(PLOT,kc,mode=0,name='',PSETS=[],cmap=False):
+def plot_xf_std_ratio(PLOT,kc,name=''):
+  #--mode 0: plot each replica
+  #--mode 1: plot average and standard deviation of replicas 
 
-    plot_xf_main(PLOT,kc,mode,name,PSETS,cmap)
-    plot_xf_strange(PLOT,kc,mode,name)
-    plot_xf_strange_std(PLOT,kc,name)
+  nrows,ncols=2,2
+  fig = py.figure(figsize=(ncols*7,nrows*4))
+  ax11=py.subplot(nrows,ncols,1)
+  ax12=py.subplot(nrows,ncols,2)
+  ax21=py.subplot(nrows,ncols,3)
+  ax22=py.subplot(nrows,ncols,4)
+
+  filename = '%s/gallery/ppdfs-std-ratio'%PLOT[0][0]
+
+  filename += name
+
+  #--first PLOT entry is no EIC
+  #--further PLOT entries are EIC
+
+  j = 0
+
+  #--get denominator
+  wdir, Q2, color, style, label, alpha = PLOT[0][0], PLOT[0][1], PLOT[0][2], PLOT[0][3], PLOT[0][4], PLOT[0][5]
+  load_config('%s/input.py'%wdir)
+  istep=core.get_istep()
+  #--load data if it exists
+  try:
+      if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+      else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+  #--generate data and then load it if it does not exist
+  except:
+      gen_xf(wdir,Q2)
+      if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+      else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+      
+  replicas=core.get_replicas(wdir)
+  cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+  best_cluster=cluster_order[0]
+
+  X=data['X']
+  X1 = data['X'][:100]
+  X2 = data['X'][100:]
+
+  denom = {}
+  for flav in data['XF']:
+      denom[flav] = np.std(data['XF'][flav],axis=0)
+
+  for plot in PLOT:
+      j+=1
+      if j == 1: continue
+
+      wdir, Q2, color, style, label, alpha = plot[0], plot[1], plot[2], plot[3], plot[4], plot[5]
+      load_config('%s/input.py'%wdir)
+      istep=core.get_istep()
+
+      #--load data if it exists
+      try:
+          if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+          else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+      #--generate data and then load it if it does not exist
+      except:
+          gen_xf(wdir,Q2)
+          if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+          else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+          
+      replicas=core.get_replicas(wdir)
+      cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+      best_cluster=cluster_order[0]
+
+      X=data['X']
+      X1 = data['X'][:100]
+      X2 = data['X'][100:]
+
+      for flav in data['XF']:
+          std = np.std(data['XF'][flav],axis=0)
+
+          if   flav=='up':  ax = ax11
+          elif flav=='dp':  ax = ax12
+          elif flav=='sp':  ax = ax21
+          elif flav=='g':   ax = ax22
+          else: continue
+
+          #--plot std over denom
+          ax.plot(X,std/denom[flav],style,color=color)
+
+
+
+  for ax in [ax11,ax12,ax21,ax22]:
+        ax.set_xlim(1e-4,0.5)
+        ax.semilogx()
+          
+        ax.tick_params(axis='both', which='major', top=True, right=True, direction='in',labelsize=25,length=5  ,width=1.5)
+        ax.tick_params(axis='both', which='minor', top=True, right=True, direction='in',labelsize=25,length=2.5,width=1.5)
+        ax.set_xlabel(r'\boldmath$x$'    ,size=30)
+        ax.set_ylabel(r'$\sigma^{EIC}/\sigma$',size=30)
+        ax.set_ylim(0,1.0) ,ax.set_yticks([0,0.2,0.4,0.6,0.8,1.0])
+
+  ax11.text(0.05,0.85,r'\boldmath{$\Delta u^+$}', transform=ax11.transAxes,size=25)
+  ax12.text(0.05,0.85,r'\boldmath{$\Delta d^+$}', transform=ax12.transAxes,size=25)
+  ax21.text(0.05,0.85,r'\boldmath{$\Delta s^+$}', transform=ax21.transAxes,size=25)
+  ax22.text(0.05,0.85,r'\boldmath{$\Delta g$}',   transform=ax22.transAxes,size=25)
+
+  if Q2 == 1.27**2: ax11.text(0.50,0.85,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
+  else:             ax11.text(0.50,0.85,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+
+  py.tight_layout()
+
+  filename+='.png'
+
+  checkdir('%s/gallery'%wdir)
+  py.savefig(filename)
+  print 'Saving figure to %s'%filename
+
+def plot_xf(PLOT,kc,kind=0,mode=0,name='',PSETS=[],cmap=False):
+
+    if kind == 0:
+        plot_xf_main(PLOT,kc,mode,name,PSETS,cmap)
+        plot_xf_strange(PLOT,kc,mode,name)
+        plot_xf_strange_std(PLOT,kc,name)
+    if kind == 1:
+        plot_xf_std_ratio(PLOT,kc,name)
         
         
         

@@ -54,8 +54,8 @@ def plot_pvdis_e(wdir,kc):
     conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90001.xlsx'
     conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90002.xlsx'
     #--moderate
-    conf['datasets']['idis']['xlsx'][90011]='idis/expdata/90011.xlsx'
-    conf['datasets']['idis']['xlsx'][90012]='idis/expdata/90012.xlsx'
+    #conf['datasets']['idis']['xlsx'][90011]='idis/expdata/90011.xlsx'
+    #conf['datasets']['idis']['xlsx'][90012]='idis/expdata/90012.xlsx'
     #--pessimistic
     #conf['datasets']['idis']['xlsx'][90021]='idis/expdata/90021.xlsx'
     #conf['datasets']['idis']['xlsx'][90022]='idis/expdata/90022.xlsx'
@@ -132,19 +132,19 @@ def plot_pvdis_e(wdir,kc):
     ax11.set_ylim(1e-4,1)
     ax11.semilogx()
     ax11.semilogy()
-    ax11.text(0.03,0.03,r'$Q^2=%s$'%np.round(Q2[0],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax11.transAxes,size=16)
-    ax11.text(0.15,0.12,r'$Q^2=%s$'%np.round(Q2[1],1)                                  ,transform=ax11.transAxes,size=16)
-    ax11.text(0.25,0.21,r'$Q^2=%s$'%np.round(Q2[2],1)                                  ,transform=ax11.transAxes,size=16)
-    ax11.text(0.30,0.31,r'$Q^2=%s$'%np.round(Q2[3],1)                                  ,transform=ax11.transAxes,size=16)
-    ax11.text(0.40,0.42,r'$Q^2=%s$'%np.round(Q2[4],1)                                  ,transform=ax11.transAxes,size=16)
-    ax11.text(0.50,0.52,r'$Q^2=%s$'%np.round(Q2[5],1)                                  ,transform=ax11.transAxes,size=16)
-    ax11.text(0.55,0.61,r'$Q^2=%s$'%np.round(Q2[6],1)                                  ,transform=ax11.transAxes,size=16)
-    ax11.text(0.65,0.71,r'$Q^2=%s$'%np.round(Q2[7],1)                                  ,transform=ax11.transAxes,size=16)
-    ax11.text(0.70,0.81,r'$Q^2=%s$'%np.round(Q2[8],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.02,0.07,r'$Q^2=%s$'%np.round(Q2[0],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax11.transAxes,size=16)
+    ax11.text(0.15,0.16,r'$Q^2=%s$'%np.round(Q2[1],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.25,0.25,r'$Q^2=%s$'%np.round(Q2[2],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.30,0.35,r'$Q^2=%s$'%np.round(Q2[3],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.40,0.47,r'$Q^2=%s$'%np.round(Q2[4],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.50,0.57,r'$Q^2=%s$'%np.round(Q2[5],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.55,0.65,r'$Q^2=%s$'%np.round(Q2[6],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.65,0.75,r'$Q^2=%s$'%np.round(Q2[7],1)                                  ,transform=ax11.transAxes,size=16)
+    ax11.text(0.70,0.85,r'$Q^2=%s$'%np.round(Q2[8],1)                                  ,transform=ax11.transAxes,size=16)
 
-    if est == 'opt': ax11.text(0.4,0.9,r'\textrm{Optimistic}' ,transform=ax11.transAxes,size=20)
-    if est == 'mod': ax11.text(0.4,0.9,r'\textrm{Moderate}'   ,transform=ax11.transAxes,size=20)
-    if est == 'pes': ax11.text(0.4,0.9,r'\textrm{Pessimistic}',transform=ax11.transAxes,size=20)
+    #if est == 'opt': ax11.text(0.4,0.9,r'\textrm{Optimistic}' ,transform=ax11.transAxes,size=20)
+    #if est == 'mod': ax11.text(0.4,0.9,r'\textrm{Moderate}'   ,transform=ax11.transAxes,size=20)
+    #if est == 'pes': ax11.text(0.4,0.9,r'\textrm{Pessimistic}',transform=ax11.transAxes,size=20)
 
     ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
 
@@ -155,7 +155,7 @@ def plot_pvdis_e(wdir,kc):
     label2  = r'\textbf{\textrm{JAM4EIC(p)}}'
     label3  = r'\textbf{\textrm{JAM4EIC(d)}}'
     labels  = [label1,label2,label3]
-    ax11.legend(handles,labels,loc='upper left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+    ax11.legend(handles,labels,loc='upper left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
     ax11.set_ylabel(r'$A_{PV}^e$',size=30)
 
     py.tight_layout()
@@ -165,166 +165,6 @@ def plot_pvdis_e(wdir,kc):
     py.savefig(filename)
     print
     print 'Saving PV asymmetry plot to %s'%filename
-
-def plot_pvdis_e_ratio(wdir,kc,kind='opt'):
-
-    print('\ngenerating PVDIS (electron) asymmetry ratio from %s'%(wdir))
-    load_config('%s/input.py'%wdir)
-    istep=core.get_istep()
-    predictions = load('%s/data/predictions-%d.dat'%(wdir,istep))
-    if 'idis' not in predictions['reactions']: return
-
-    nrows,ncols=6,3
-    fig = py.figure(figsize=(ncols*12,nrows*3))
-    ax11 = py.subplot(nrows,ncols,1)
-    ax12 = py.subplot(nrows,ncols,2)
-    ax13 = py.subplot(nrows,ncols,3)
-    ax21 = py.subplot(nrows,ncols,4)
-    ax22 = py.subplot(nrows,ncols,5)
-    ax23 = py.subplot(nrows,ncols,6)
-    ax31 = py.subplot(nrows,ncols,7)
-    ax32 = py.subplot(nrows,ncols,8)
-    ax33 = py.subplot(nrows,ncols,9)
-    ax41 = py.subplot(nrows,ncols,10)
-    ax42 = py.subplot(nrows,ncols,11)
-    ax43 = py.subplot(nrows,ncols,12)
-    ax51 = py.subplot(nrows,ncols,13)
-    ax52 = py.subplot(nrows,ncols,14)
-    ax53 = py.subplot(nrows,ncols,15)
-    ax61 = py.subplot(nrows,ncols,16)
-    ax62 = py.subplot(nrows,ncols,17)
-    ax63 = py.subplot(nrows,ncols,18)
-
-    if kind == 'opt':  idx1,idx2 = 90001,90002
-    if kind == 'mod':  idx1,idx2 = 90011,90012
-    if kind == 'pess': idx1,idx2 = 90021,90022
-
-    conf['aux']=aux.AUX()
-    conf['datasets'] = {}
-    conf['datasets']['idis']={}
-    conf['datasets']['idis']['xlsx']={}
-    conf['datasets']['idis']['xlsx'][idx1]='idis/expdata/%s.xlsx'%idx1
-    conf['datasets']['idis']['xlsx'][idx2]='idis/expdata/%s.xlsx'%idx2
-    conf['datasets']['idis']['norm']={}
-    conf['datasets']['idis']['filters']=[]
-    conf['idis tabs']=READER().load_data_sets('idis')
-    tables = conf['idis tabs'].keys()
-
-    replicas=core.get_replicas(wdir)
-    core.mod_conf(istep,replicas[0]) #--set conf as specified in istep   
-   
-    resman=RESMAN(nworkers=1,parallel=False,datasets=False)   #conf['pdf'] comes from this line!!!
-    parman=resman.parman
-
-    jar=load('%s/data/jar-%d.dat'%(wdir,istep))
-    replicas=jar['replicas']
-    parman.order=jar['order']
-
-    data = predictions['reactions']['idis']
-
-    cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc)
-
-    #--get theory by seperating solutions and taking mean
-    for idx in tables:
-        predictions = copy.copy(data[idx]['prediction-rep'])
-        del data[idx]['prediction-rep']
-        del data[idx]['residuals-rep']
-        for ic in range(nc):
-            predictions_ic = [predictions[i] for i in range(len(predictions)) if cluster[i] == ic]
-            data[idx]['thy-%d'%ic]  = np.mean(predictions_ic, axis = 0)
-            data[idx]['dthy-%d'%ic] = np.std(predictions_ic, axis=0)**0.5
-
-    Q2 = {}
-    for idx in tables:
-        x      = conf['idis tabs'][idx]['X']
-        q2     = conf['idis tabs'][idx]['Q2']
-        values = conf['idis tabs'][idx]['value']
-        alpha  = data[idx]['alpha']
-        l = len(values)
-        theory=data[idx]['thy-0']
-        #--get fixed values for Q2
-        Q2[idx] = []
-        for j in range(len(q2)):
-            if q2[j] in Q2[idx]: continue
-            Q2[idx].append(q2[j])
-        #--get corresponding x, theory values
-        X, thy, val, alp = {}, {}, {}, {}
-        for j in range(len(Q2[idx])):
-            X[j], thy[j], val[j], alp[j] = [],[],[],[]
-            for i in range(l):
-                if q2[i] != Q2[idx][j]: continue
-                X[j].append(x[i])
-                thy[j].append(theory[i])
-                val[j].append(values[i])
-                alp[j].append(alpha[i])
-        for j in range(len(Q2[idx])):
-            if j==0 and idx in [90001,90011,90021]: ax=ax11
-            if j==1 and idx in [90001,90011,90021]: ax=ax12
-            if j==2 and idx in [90001,90011,90021]: ax=ax13
-            if j==3 and idx in [90001,90011,90021]: ax=ax21
-            if j==4 and idx in [90001,90011,90021]: ax=ax22
-            if j==5 and idx in [90001,90011,90021]: ax=ax23
-            if j==6 and idx in [90001,90011,90021]: ax=ax31
-            if j==7 and idx in [90001,90011,90021]: ax=ax32
-            if j==8 and idx in [90001,90011,90021]: ax=ax33
-
-            if j==0 and idx in [90002,90012,90022]: ax=ax41
-            if j==1 and idx in [90002,90012,90022]: ax=ax42
-            if j==2 and idx in [90002,90012,90022]: ax=ax43
-            if j==3 and idx in [90002,90012,90022]: ax=ax51
-            if j==4 and idx in [90002,90012,90022]: ax=ax52
-            if j==5 and idx in [90002,90012,90022]: ax=ax53
-            if j==6 and idx in [90002,90012,90022]: ax=ax61
-            if j==7 and idx in [90002,90012,90022]: ax=ax62
-            if j==8 and idx in [90002,90012,90022]: ax=ax63
-
-            ratio = np.array(val[j])/np.array(thy[j])
-            yerr  = np.array(alp[j])/np.array(val[j])
-            #ax.errorbar(X[j],np.ones(len(X[j])),yerr=np.array(alp[j])/np.array(val[j]),color='black',fmt='o',ms=3.0)
-            #ax.plot(X[j],ratio,color=color,alpha=0.5)
-            ax.errorbar(X[j],ratio,yerr=yerr,color='red',fmt='.',ms=10)
-
-    for ax in [ax11,ax12,ax13,ax21,ax22,ax23,ax31,ax32,ax33,ax41,ax42,ax43,ax51,ax52,ax53,ax61,ax62,ax63]:
-        ax.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
-        ax.semilogx()
-        ax.axhline(1,0,1,ls='--',color='black',alpha=0.5)
-        ax.set_ylim(0.97,1.03)
-        ax.set_xlim(3e-4,0.7)
-
-    #ax11.set_ylim(0.97,1.03)
-    #ax12.set_ylim(0.99,1.01)
-    #ax13.set_ylim(0.994,1.006)
-    #ax14.set_ylim(0.9975,1.0025)
-    #ax15.set_ylim(0.999,1.001)
-    #ax21.set_ylim(0.999,1.001)
-    #ax22.set_ylim(0.999,1.001)
-    #ax23.set_ylim(0.999,1.001)
-    #ax24.set_ylim(0.999,1.001)
-
-    ax61.set_xlabel(r'$x$',size=24)
-    ax62.set_xlabel(r'$x$',size=24)
-    ax63.set_xlabel(r'$x$',size=24)
-    ax11.set_ylabel(r'$data/theory$',size=24)
-    ax21.set_ylabel(r'$data/theory$',size=24)
-
-
-    ax11.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][0],1),transform=ax11.transAxes,size=30)
-    ax12.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][1],1),transform=ax12.transAxes,size=30)
-    ax13.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][2],1),transform=ax13.transAxes,size=30)
-    ax21.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][3],1),transform=ax21.transAxes,size=30)
-    ax22.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][4],1),transform=ax22.transAxes,size=30)
-    ax23.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][5],1),transform=ax23.transAxes,size=30)
-    ax31.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][6],1),transform=ax31.transAxes,size=30)
-    ax32.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][7],1),transform=ax32.transAxes,size=30)
-    ax33.text(0.05,0.9,r'$Q^2=%s$'%np.round(Q2[90001][8],1),transform=ax33.transAxes,size=30)
-
-    py.tight_layout()
-    checkdir('%s/gallery'%wdir)
-    filename='%s/gallery/pvdis_e_ratio.png'%(wdir)
-
-    py.savefig(filename)
-    print
-    print 'Saving PV (electron) asymmetry ratio plot to %s'%filename
 
 def plot_pvdis_had(wdir,kc):
 
@@ -351,7 +191,7 @@ def plot_pvdis_had(wdir,kc):
     #--optimistic
     conf['datasets']['pidis']['xlsx'][90001]='pidis/expdata/90001.xlsx'
     #--moderate
-    conf['datasets']['pidis']['xlsx'][90011]='pidis/expdata/90011.xlsx'
+    #conf['datasets']['pidis']['xlsx'][90011]='pidis/expdata/90011.xlsx'
     #--pessimistic
     #conf['datasets']['pidis']['xlsx'][90021]='pidis/expdata/90021.xlsx'
 
@@ -444,19 +284,19 @@ def plot_pvdis_had(wdir,kc):
     ax11.yaxis.set_minor_locator(locmin)
     ax11.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
-    ax11.text(0.60,0.30,r'$Q^2=%s$'%np.round(Q2[0],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax11.transAxes,size=14)
-    ax11.text(0.66,0.38,r'$Q^2=%s$'%np.round(Q2[1],1)                                  ,transform=ax11.transAxes,size=14)
-    ax11.text(0.73,0.46,r'$Q^2=%s$'%np.round(Q2[2],1)                                  ,transform=ax11.transAxes,size=14)
-    ax11.text(0.80,0.53,r'$Q^2=%s$'%np.round(Q2[3],1)                                  ,transform=ax11.transAxes,size=14)
-    ax11.text(0.80,0.60,r'$Q^2=%s$'%np.round(Q2[4],1)                                  ,transform=ax11.transAxes,size=14)
-    ax11.text(0.80,0.66,r'$Q^2=%s$'%np.round(Q2[5],1)                                  ,transform=ax11.transAxes,size=14)
-    ax11.text(0.80,0.73,r'$Q^2=%s$'%np.round(Q2[6],1)                                  ,transform=ax11.transAxes,size=14)
-    ax11.text(0.80,0.80,r'$Q^2=%s$'%np.round(Q2[7],1)                                  ,transform=ax11.transAxes,size=14)
-    ax11.text(0.80,0.90,r'$Q^2=%s$'%np.round(Q2[8],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.60,0.32,r'$Q^2=%s$'%np.round(Q2[0],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax11.transAxes,size=14)
+    ax11.text(0.66,0.40,r'$Q^2=%s$'%np.round(Q2[1],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.73,0.48,r'$Q^2=%s$'%np.round(Q2[2],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.80,0.55,r'$Q^2=%s$'%np.round(Q2[3],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.80,0.62,r'$Q^2=%s$'%np.round(Q2[4],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.80,0.68,r'$Q^2=%s$'%np.round(Q2[5],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.80,0.75,r'$Q^2=%s$'%np.round(Q2[6],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.80,0.82,r'$Q^2=%s$'%np.round(Q2[7],1)                                  ,transform=ax11.transAxes,size=14)
+    ax11.text(0.80,0.92,r'$Q^2=%s$'%np.round(Q2[8],1)                                  ,transform=ax11.transAxes,size=14)
 
-    if est == 'opt': ax11.text(0.4,0.9,r'\textrm{Optimistic}' ,transform=ax11.transAxes,size=20)
-    if est == 'mod': ax11.text(0.4,0.9,r'\textrm{Moderate}'   ,transform=ax11.transAxes,size=20)
-    if est == 'pes': ax11.text(0.4,0.9,r'\textrm{Pessimistic}',transform=ax11.transAxes,size=20)
+    #if est == 'opt': ax11.text(0.4,0.9,r'\textrm{Optimistic}' ,transform=ax11.transAxes,size=20)
+    #if est == 'mod': ax11.text(0.4,0.9,r'\textrm{Moderate}'   ,transform=ax11.transAxes,size=20)
+    #if est == 'pes': ax11.text(0.4,0.9,r'\textrm{Pessimistic}',transform=ax11.transAxes,size=20)
 
     ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
 
@@ -465,8 +305,8 @@ def plot_pvdis_had(wdir,kc):
     label2  = r'\textbf{\textrm{JAM4EIC(pos)}}'
     label3  = r'\textbf{\textrm{JAM4EIC(neg)}}'
     labels  = [label1,label2,label3]
-    ax11.legend(handles,labels,loc='upper left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
-    ax11.set_ylabel(r'$|A_{PV}^{had}|$',size=30)
+    ax11.legend(handles,labels,loc='upper left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+    ax11.set_ylabel(r'$|A_{PV}^{p}|$',size=30)
 
     py.tight_layout()
     checkdir('%s/gallery'%wdir)

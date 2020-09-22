@@ -60,11 +60,11 @@ def gen_pvdis_xlsx(wdir,kind,tar,est):
     checkdir('%s/sim'%wdir)
 
     #-- the kinem. var.
-    data={_:[] for _ in ['col','target','X','Xdo','Xup','Q2','Q2do','Q2up','obs','value','stat_u','syst_u','pol','pol_u','RS']}
+    data={_:[] for _ in ['col','target','X','Xdo','Xup','Q2','Q2do','Q2up','obs','value','stat_u','syst_u','norm_c','RS']}
 
     #--get specific points from data file at fitpack/database/pvdis/expdata/1000.xlsx
     fdir = os.environ['FITPACK']
-    grid = pd.read_excel(fdir + '/database/pvdis/expdata/1000.xlsx')
+    grid = pd.read_excel(fdir + '/database/EIC/expdata/1000.xlsx')
     grid = grid.to_dict(orient='list')
     data['X']    = grid['X']
     data['Q2']   = grid['Q2']
@@ -76,9 +76,6 @@ def gen_pvdis_xlsx(wdir,kind,tar,est):
 
     obs = 'A_PV_%s'%kind
 
-    if kind == 'e':   pol = 0.7
-    if kind == 'had': pol = 0.7
-
     for i in range(len(data['X'])):
         data['col']   .append('JAM4EIC')
         data['target'].append(tar)
@@ -86,8 +83,7 @@ def gen_pvdis_xlsx(wdir,kind,tar,est):
         data['value'] .append(0.0)
         data['stat_u'].append(1e-10)
         data['syst_u'].append(0.0)
-        data['pol']   .append(pol)
-        data['pol_u'] .append(0.0)
+        data['norm_c'].append(0.0)
 
     df=pd.DataFrame(data)
     filename = '%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est)
@@ -111,8 +107,7 @@ def gen_conf(wdir,kind,tar,est):
     conf['datasets'][exp]['xlsx'][idx]='./%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est)
     conf['steps'][istep]['datasets'][exp].append(idx)
 
-    fdir = os.environ['FITPACK']
-    fn   = [fdir + '/database/pvdis/expdata/1000.xlsx']
+    fn   = [conf['datasets'][exp]['xlsx'][idx]]
     if exp=='idis':
         conf['idis grid'] = {}
         if tar == 'p': conf['idis grid']['overwrite'] = True
@@ -169,8 +164,8 @@ def update_tabs(wdir,kind,tar,est,lum):
 
     del tab['prediction-rep']
 
-    if kind == 'e':   tab['stat_u'],tab['pol_u'],tab['syst_u'] = A_PV_e_errors  (wdir,kind,tar,est,tab['value'],lum)
-    if kind == 'had': tab['stat_u'],tab['pol_u'],tab['syst_u'] = A_PV_had_errors(wdir,kind,tar,est,tab['value'],lum)
+    if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,tab['value'],lum)
+    if kind == 'had': tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_had_errors(wdir,kind,tar,est,tab['value'],lum)
 
     df=pd.DataFrame(tab)
     filename = '%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est)
@@ -194,8 +189,6 @@ def A_PV_e_errors(wdir,kind,tar,est,value,lum):
     dx  = Xup  - Xdo
     dQ2 = Q2up - Q2do
     bins = dx*dQ2
-
-    pol = data['pol'][0]
 
     RS = data['RS'][0]
     S  = RS**2
@@ -294,35 +287,37 @@ def A_PV_e_errors(wdir,kind,tar,est,value,lum):
     NR = lum*sigR*yjac
     NL = lum*sigL*yjac
 
-    #--measured asymmetry (already multiplied by pol in idis/residuals)
-    Am = np.array(value)
+    #--theory asymmetry
+    A = np.array(value)
  
     #--absolute uncertainty (not divided by sigma) 
-    stat2 = (1 + Am**2)/(NR + NL)/(pol**2)
+    stat2 = (1 + A**2)/(NR + NL)
 
     stat = np.sqrt(stat2)
 
     #--statistical uncertainty
     data['stat_u'] = stat
 
-    #--polarization uncertainty (1%)
-    data['pol_u']  = Am*0.01
+    #--normalization uncertainty
+    pol   = 0.01   #polarization
+    Q2det = 0.002  #Q2 determination
+    recon = 0.002  #reconstruction error
+    DAQ   = 0.0015 #DAQ pile up and dead time
+    data['norm_c'] = np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A
 
-    #--add systemic uncertainties outside of polarization
     Y = np.array(data['Q2'])/2/np.array(data['X'])/((S-M2)/2)
-
-    #--optimistic: no extra errors
+    #--add systemic uncertainties
+    #--optimistic: 
     if est == 'opt':
-        data['syst_u'] = Am*0.00
+        pion = 0.01  #pion background
+        rad  = 0.002 #radiative correction
+        data['syst_u'] = np.sqrt(pion**2 + rad**2)*A
 
-    #--moderate: 1% below y = 0.01, 1.5% above 
+    #--moderate: do not have
     elif est == 'mod':
-        data['syst_u'] = np.zeros(l)
-        for i in range(l):
-            if Y[i] <= 0.01: data['syst_u'][i] = Am[i]*0.010
-            if Y[i] >  0.01: data['syst_u'][i] = Am[i]*0.015
+        return
 
-    #--pessimistic: do not have yet
+    #--pessimistic: do not have
     elif est == 'pes':
         return
 
@@ -330,7 +325,7 @@ def A_PV_e_errors(wdir,kind,tar,est,value,lum):
         print('est must be opt, mod, or pes')
         return
 
-    return data['stat_u'],data['pol_u'],data['syst_u']
+    return data['stat_u'],data['syst_u'],data['norm_c']
 
 def A_PV_had_errors(wdir,kind,tar,est,value,lum):
 
@@ -349,8 +344,6 @@ def A_PV_had_errors(wdir,kind,tar,est,value,lum):
     dx  = Xup  - Xdo
     dQ2 = Q2up - Q2do
     bins = dx*dQ2
-
-    pol = data['pol'][0]
 
     RS = data['RS'][0]
     S  = RS**2
@@ -450,46 +443,41 @@ def A_PV_had_errors(wdir,kind,tar,est,value,lum):
     NR = lum*sigR*yjac
     NL = lum*sigL*yjac
 
-    #--polarization and polarization uncertainty
-    P    = 0.7
-    sigP = 0.07
-
-    #--measured asymmetry (already multiplied by pol in pidis/residuals)
-    Am = np.array(value)
+    #--theory asymmetry
+    A = np.array(value)
  
     #--absolute uncertainty (not divided by sigma) 
-    stat2 = (1 + Am**2)/(NR + NL)/(P**2)
+    stat2 = (1 + A**2)/(NR + NL)
 
     stat = np.sqrt(stat2)
 
     #--statistical uncertainties
     data['stat_u'] = stat
 
-    #--polarization uncertainty (1%)
-    data['pol_u']  = Am*0.01
+    #--normalization uncertainty
+    pol   = 0.02   #polarization
+    Q2det = 0.002  #Q2 determination
+    recon = 0.002  #reconstruction error
+    DAQ   = 0.0015 #DAQ pile up and dead time
+    data['norm_c'] = np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A
 
-    #--add systemic uncertainties beyond polarization
     Y = np.array(data['Q2'])/2/np.array(data['X'])/((S-M2)/2)
-
-    #--optimistic: flat 1%
+    #--add systemic uncertainties
+    #--optimistic: 
     if est == 'opt':
-        data['syst_u'] = Am*0.01
+        pion = 0.01  #pion background
+        rad  = 0.002 #radiative correction
+        data['syst_u'] = np.sqrt(pion**2 + rad**2)*A
 
-    #--moderate: 2% below y = 0.01, 2.5% above 
+    #--moderate: do not have
     elif est == 'mod':
-        data['syst_u'] = np.zeros(l)
-        for i in range(l):
-            if Y[i] <= 0.01: data['syst_u'][i] = Am[i]*0.020
-            if Y[i] >  0.01: data['syst_u'][i] = Am[i]*0.025
-    #--pessimistic: do not have yet
+        return
+
+    #--pessimistic: do not have
     elif est == 'pes':
         return
 
-    else:
-        print('est must be opt, mod, or pes')
-        return
-
-    return data['stat_u'],data['pol_u'],data['syst_u']
+    return data['stat_u'],data['syst_u'],data['norm_c']
 
 def convert_lum(lum):
     one=0.3893793721  #--GeV2 mbarn from PDG
@@ -510,7 +498,6 @@ def plot_errors(wdir,kind,tar,est,lum):
     X     = np.array(tab['X'])
     value = np.array(tab['value'])
     stat  = np.abs(np.array(tab['stat_u'])/value)
-    pol   = np.abs(np.array(tab['pol_u']) /value)
     syst  = np.abs(np.array(tab['syst_u'])/value)
 
     #--check for zero systematic uncertainty
@@ -518,13 +505,12 @@ def plot_errors(wdir,kind,tar,est,lum):
     for i in range(len(syst)):
         if syst[i] != 0: zero = False
 
-    alpha = np.sqrt((stat**2 + pol**2 + syst**2))
+    alpha = np.sqrt((stat**2 + syst**2))
 
     hand = {}
-    hand['alpha']                 = ax11.scatter(X,alpha,color='red'    ,s=20,marker='s')
-    hand['stat']                  = ax11.scatter(X,stat ,color='green'  ,s=10,marker='o')
-    hand['pol']                   = ax11.scatter(X,pol  ,color='blue'   ,s=10,marker='*')
-    if zero != True: hand['syst'] = ax11.scatter(X,syst ,color='magenta',s=10,marker='v')
+    hand['alpha'] = ax11.scatter(X,alpha,color='red'    ,s=20,marker='s')
+    hand['stat']  = ax11.scatter(X,stat ,color='green'  ,s=10,marker='o')
+    hand['syst']  = ax11.scatter(X,syst ,color='magenta',s=10,marker='v')
 
     ax11.set_xlim(1e-4,1)
     ax11.semilogx()
@@ -533,9 +519,9 @@ def plot_errors(wdir,kind,tar,est,lum):
     if kind == 'e':
         ax11.set_ylim(1e-4,1e-1)
         ax11.set_ylabel(r'$|\sigma_{A_{PV}^e}/A_{PV}^e|$',size=30)
-        if est == 'opt': ax11.text(0.6,0.4,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
-        if est == 'mod': ax11.text(0.6,0.4,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
-        if est == 'pes': ax11.text(0.6,0.4,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
+        #if est == 'opt': ax11.text(0.6,0.4,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
+        #if est == 'mod': ax11.text(0.6,0.4,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
+        #if est == 'pes': ax11.text(0.6,0.4,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
     if kind == 'had':
         ax11.set_ylim(1e-3,1e3)
         ax11.set_yticks([1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3])
@@ -543,9 +529,9 @@ def plot_errors(wdir,kind,tar,est,lum):
         ax11.yaxis.set_minor_locator(locmin)
         ax11.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
         ax11.set_ylabel(r'$|\sigma_{A_{PV}^{had}}/A_{PV}^{had}|$',size=30)
-        if est == 'opt': ax11.text(0.6,0.6,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
-        if est == 'mod': ax11.text(0.6,0.6,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
-        if est == 'pes': ax11.text(0.6,0.6,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
+        #if est == 'opt': ax11.text(0.6,0.6,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
+        #if est == 'mod': ax11.text(0.6,0.6,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
+        #if est == 'pes': ax11.text(0.6,0.6,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
 
 
     ax11.set_xlabel(r'$x$',size=30)
@@ -556,15 +542,11 @@ def plot_errors(wdir,kind,tar,est,lum):
     if tar == 'p':   ax11.text(0.7,0.85,r'\textrm{Proton}'     ,transform = ax11.transAxes,size=30)
     if tar == 'd':   ax11.text(0.7,0.85,r'\textrm{Deuteron}'   ,transform = ax11.transAxes,size=30)
 
-    handles = [hand['alpha'],hand['stat'],hand['pol']]
+    handles = [hand['alpha'],hand['stat'],hand['syst']]
     label1 = r'\textbf{\textrm{Total}}'
     label2 = r'\textbf{\textrm{Stat}}'
-    label3 = r'\textbf{\textrm{Pol}}'
+    label3 = r'\textbf{\textrm{Syst}}'
     labels = [label1,label2,label3]
-
-    if zero != True:
-        handles.append(hand['syst'])
-        labels.append(r'\textbf{\textrm{Syst}}')
 
     ax11.legend(handles,labels,loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
     py.tight_layout()
@@ -742,12 +724,8 @@ def get_tables(wdir,kind,tar,est):
     for i in range(len(_replicas)):
         replicas.append(_replicas['value%s'%(i+1)])
 
-    #--get specific points from data file at fitpack/database/pvdis/expdata/1000.xlsx
-    fdir = os.environ['FITPACK']
-    grid = pd.read_excel(fdir + '/database/pvdis/expdata/1000.xlsx')
-    grid = grid.to_dict(orient='list')
-    X    = grid['X']
-    Q2   = grid['Q2']
+    X    = tab['X']
+    Q2   = tab['Q2']
 
     return X,Q2,central,replicas
 

@@ -17,9 +17,9 @@ from analysis.corelib import core
 from analysis.corelib import classifier
 
 
-def plot_params(wdir,dist,kc,histogram=False):
+def plot_params(wdir,dist,kc,hist=False):
 
-    #--histogram: If False, plot point by point.  If True, plot histogram.
+    #--hist: If False, plot point by point.  If True, plot histogram.
 
     load_config('%s/input.py'%wdir)
     istep=core.get_istep()
@@ -44,37 +44,50 @@ def plot_params(wdir,dist,kc,histogram=False):
         for j in range(len(replicas)):
             params[i][j] = replicas[j]['params'][istep][idx[i]]
 
+    #--sort alphabetically
+    z = sorted(zip(order,params))
+    order  = [z[i][0] for i in range(len(z))]
+    params = [z[i][1] for i in range(len(z))]
+
+    #--get names for organization
+    names = [(order[i].split()[0],order[i].split()[1]) for i in range(len(order))]
+    n0    = sorted(list(set(names[i][0] for i in range(len(names)))))
+    n1    = sorted(list(set(names[i][1] for i in range(len(names)))))
+
     #--create plot with enough space for # of parameters
-    nrows, ncols = np.ceil(len(order)/5.0), 5
+    nrows,ncols = len(n0),len(n1)
     fig = py.figure(figsize=(ncols*7,nrows*4))
     X = np.linspace(1,len(replicas),len(replicas))
 
     #--create plot
     for i in range(len(order)):
-        ax = py.subplot(nrows,ncols, i+1)
-        ax.set_title('%s'%(order[i]), size=20)
+        j  = n0.index(names[i][0])
+        k  = [names[m][1] for m in range(len(names)) if names[m][0]==n0[j]].index(names[i][1])
+        idx = j*ncols + k + 1
+        ax = py.subplot(nrows,ncols, idx)
+        ax.set_title('%s'%(order[i]), size=30)
         for j in range(nc):
             color  = colors[clusters[j]]
             par = [params[i][k] for k in range(len(params[i])) if clusters[k]==j]
             mean = np.mean(par)
             std  = np.std(par)
-            if histogram:
+            meanl = r'mean: %6.5f'%mean
+            stdl  = r'std: %6.5f'%std
+            if hist:
                 ax.hist(par,color=color,alpha=0.6,edgecolor='black')
-                ax.axvline(mean,ymin=0,ymax=1,ls='--',color=color,alpha=0.8)
-                ax.axvspan(mean-std,mean+std,alpha=0.1,color=color)
-                if j==0:
-                    ax.text(0.77,0.95,'mean:'%mean,transform=ax.transAxes,size=10)
-                    ax.text(0.77,0.90,'std:'%std,  transform=ax.transAxes,size=10)
-                    ax.text(0.87,0.95,'%6.5f'%mean,transform=ax.transAxes,size=10)
-                    ax.text(0.87,0.90,'%6.5f'%std, transform=ax.transAxes,size=10)
+                ax.axvline(mean,ymin=0,ymax=1,ls='--',color=color,alpha=0.8,label=meanl)
+                ax.axvspan(mean-std,mean+std,alpha=0.2,color=color,label=stdl)
             else:
                 ax.scatter(X,par,color=color) 
                 ax.axhline(mean,xmin=0,xmax=1,ls='--',color=color,alpha=0.8)
-                ax.axhspan(mean-std,mean+std,alpha=0.1,color=color)
+                ax.axhspan(mean-std,mean+std,alpha=0.2,color=color)
+        ax.legend(loc='best',frameon=False,fontsize=15)
+        ax.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
 
-    if histogram: filename='%s/gallery/%s-params-hist.png'%(wdir,dist)
-    else:         filename='%s/gallery/%s-params.png'%(wdir,dist)
+    if hist: filename='%s/gallery/params-%s-hist.png'%(wdir,dist)
+    else:         filename='%s/gallery/params-%s.png'%(wdir,dist)
     checkdir('%s/gallery'%wdir)
+    py.tight_layout()
     py.savefig(filename)
     print 'Saving figure to %s'%filename
      
