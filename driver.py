@@ -112,7 +112,7 @@ force = True
 ##--Initial Processing
 ######################
 FILT = []
-FILT.append(('g1 N',-2.0,'less'))
+#FILT.append(('g1 N',-2.0,'less'))
 
 #inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
 #predict.get_predictions(wdir,force=False)
@@ -170,7 +170,7 @@ hist=False
 PSETS = []
 
 #ppdf.gen_xf(wdir,Q2=Q2)         
-ppdf.plot_xf(PLOT,kc,mode=0,name='',PSETS=PSETS)
+#ppdf.plot_xf(PLOT,kc,mode=0,name='',PSETS=PSETS)
 
 ###########################
 ##--Parameter distributions

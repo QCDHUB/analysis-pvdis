@@ -237,13 +237,13 @@ def plot_xf_main(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
   if len(PLOT) > 1: ax11.legend(loc='upper left',fontsize=25,frameon=False)
 
   for ax in [ax11,ax21,ax22,ax31,ax32]:
-        ax.set_xlim(1e-2,1)
+        ax.set_xlim(1e-4,1)
         ax.semilogx()
           
         ax.tick_params(axis='both', which='major', top=True, right=True, direction='in',labelsize=25,length=5  ,width=1.5)
         ax.tick_params(axis='both', which='minor', top=True, right=True, direction='in',labelsize=25,length=2.5,width=1.5)
-        ax.set_xticks([0.01,0.1,1])
-        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$1$'])
+        #ax.set_xticks([0.01,0.1,1])
+        #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$1$'])
 
   for ax in [ax12]:
       ax.tick_params(axis='both', which='major', top=True, right=True, direction='in',labelsize=25,length=5  ,width=1.5)
@@ -253,39 +253,30 @@ def plot_xf_main(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
 
   ax12.set_xlim(0,0.9)
 
-  ax11.set_ylim(0,0.8)    ,ax11.set_yticks([0,0.2,0.4,0.6,0.8])
-  ax12.set_ylim(0,1.0)    ,ax12.set_yticks([0,0.2,0.4,0.6,0.8,1.0])
-  ax21.set_ylim(-0.05,0.7),ax21.set_yticks([0,0.2,0.4,0.6])
-  ax22.set_ylim(-0.04,0.1),ax22.set_yticks([-0.04,0,0.04,0.08])
-  ax31.set_ylim(-0.05,0.6),ax31.set_yticks([0,0.2,0.4,0.6])
-  ax31.set_ylim(0,0.6)    ,ax31.set_yticks([0,0.2,0.4,0.6])
-  ax32.set_ylim(0,0.8)    ,ax32.set_yticks([0,0.2,0.4,0.6,0.8])
+  ax11.set_ylim(0,0.8)     ,ax11.set_yticks([0,0.2,0.4,0.6,0.8])
+  ax12.set_ylim(0,1.0)     ,ax12.set_yticks([0,0.2,0.4,0.6,0.8,1.0])
+  ax21.set_ylim(-0.05,1.8) #,ax21.set_yticks([0,0.2,0.4,0.6])
+  ax22.set_ylim(-0.06,0.08),ax22.set_yticks([-0.04,0,0.04,0.08])
+  ax31.set_ylim(0,1.2)     #,ax31.set_yticks([0,0.2,0.4,0.6])
+  ax32.set_ylim(0,1.5)     #,ax32.set_yticks([0,0.2,0.4,0.6,0.8])
 
-  ax11.set_ylabel(r'$xf(x)$',size=30)
-  ax21.set_ylabel(r'$xf(x)$',size=30)
-  ax31.set_ylabel(r'$xf(x)$',size=30)
-  ax31.set_xlabel(r'$x$'    ,size=30)
-  ax32.set_xlabel(r'$x$'    ,size=30)   
+  ax31.set_xlabel(r'\boldmath$x$'    ,size=30)
+  ax32.set_xlabel(r'\boldmath$x$'    ,size=30)   
 
-  ax11.text(0.87,0.5,r'\boldmath{$xu_{v}$}', transform=ax11.transAxes,size=25)
-  ax11.text(0.6,0.2,r'\boldmath{$xd_{v}$}', transform=ax11.transAxes,size=25)
-
+  ax11.text(0.87,0.70 ,r'\boldmath{$xu_{v}$}', transform=ax11.transAxes,size=25)
+  ax11.text(0.75,0.20 ,r'\boldmath{$xd_{v}$}', transform=ax11.transAxes,size=25)
   ax12.text(0.2,0.3,r'\boldmath{$d/u$}', transform=ax12.transAxes,size=25)
-  if Q2 == 1.27**2: ax12.text(0.25,0.75,r'\boldmath{$Q^2 = m_c^2$}', transform=ax12.transAxes,size=30)
-  else:             ax12.text(0.15,0.75,r'\boldmath{$Q^2 = %s~GeV^2$}'%Q2, transform=ax12.transAxes,size=25)
-
-
   ax21.text(0.7,0.8,r'\boldmath{$x(\bar{d}+\bar{u})$}', transform=ax21.transAxes,size=25)
-
   ax22.text(0.1,0.85,r'\boldmath{$x(\bar{d}-\bar{u})$}', transform=ax22.transAxes,size=25)
-
   ax31.text(0.6,0.5,r'\boldmath{$xg/10$}', transform=ax31.transAxes,size=25)
-
   ax32.text(0.7,0.8,r'\boldmath{$x(s+\bar{s})$}', transform=ax32.transAxes,size=25)
 
   ax21.axhline(0,ls='--',color='black',alpha=0.5)
   ax22.axhline(0,ls='--',color='black',alpha=0.5)
  
+  if Q2 == 1.27**2: ax12.text(0.25,0.75,r'$Q^2 = m_c^2$',              transform=ax12.transAxes,size=30)
+  else:             ax12.text(0.15,0.75,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax12.transAxes,size=30)
+
   py.tight_layout()
 
   filename+='.png'
