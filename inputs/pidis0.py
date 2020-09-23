@@ -4,7 +4,7 @@ conf = {}
 ## setup posterior sampling
 
 conf['bootstrap'] = True
-conf['flat par'] = True
+conf['flat par'] = False
 conf['ftol'] = 1e-8
 
 ## setup qcd evolution
@@ -221,12 +221,13 @@ conf['params']['pdf']['sea2 b']  = {'value':    6, 'min':     0, 'max':    10, '
 
 ## ppdf parameters
 conf['su2+su3'] = 'su2'
+conf['ppdf_choice'] = 'valence'
 conf['params']['ppdf'] = {}
 
 conf['params']['ppdf']['g1 N']    = {'value':    1.54709e+00, 'min':   -10, 'max':    10, 'fixed': False}
 conf['params']['ppdf']['g1 a']    = {'value':   -7.13518e-01, 'min': -0.99, 'max':     2, 'fixed': False}
 conf['params']['ppdf']['g1 b']    = {'value':    9.45902e-01, 'min':     0, 'max':    10, 'fixed': False}
-conf['params']['ppdf']['g1 d']    = {'value':    0.000000000, 'min':   -10, 'max':    10, 'fixed': False}
+conf['params']['ppdf']['g1 d']    = {'value':    0.21230e+00, 'min': -1000, 'max':    10, 'fixed': False}
 
 conf['params']['ppdf']['uv1 N']   = {'value':    3.47549e-01, 'min':   -10, 'max':    10, 'fixed': True }
 conf['params']['ppdf']['uv1 a']   = {'value':    2.92830e-01, 'min':  -0.5, 'max':     2, 'fixed': False}
@@ -266,6 +267,204 @@ conf['params']['ppdf']['sea1 d']  = {'value':    0.000000000, 'min':   -10, 'max
 ## steps
 conf['steps'] = {}
 
+## DIS without HERA
+## fit only first shape of PDF
+conf['steps'][1] = {}
+conf['steps'][1]['dep'] = []
+conf['steps'][1]['active distributions'] = ['pdf', 'ppdf']
+conf['steps'][1]['passive distributions'] = ['ppdf']
+conf['steps'][1]['datasets'] = {}
+conf['steps'][1]['datasets']['idis'] = []
+conf['steps'][1]['datasets']['idis'].append(10010) ## proton   | F2            | SLAC
+conf['steps'][1]['datasets']['idis'].append(10011) ## deuteron | F2            | SLAC
+conf['steps'][1]['datasets']['idis'].append(10016) ## proton   | F2            | BCDMS
+conf['steps'][1]['datasets']['idis'].append(10017) ## deuteron | F2            | BCDMS
+conf['steps'][1]['datasets']['idis'].append(10020) ## proton   | F2            | NMC
+conf['steps'][1]['datasets']['idis'].append(10021) ## d/p      | F2d/F2p       | NMC
+
+## DIS with HERA
+## fit only first shape of PDF
+conf['steps'][2] = {}
+conf['steps'][2]['dep'] = [1]
+conf['steps'][2]['active distributions'] = ['pdf', 'ppdf']
+conf['steps'][2]['passive distributions'] = ['ppdf']
+conf['steps'][2]['datasets'] = {}
+conf['steps'][2]['datasets']['idis'] = []
+conf['steps'][2]['datasets']['idis'].append(10010) ## proton   | F2            | SLAC
+conf['steps'][2]['datasets']['idis'].append(10011) ## deuteron | F2            | SLAC
+conf['steps'][2]['datasets']['idis'].append(10016) ## proton   | F2            | BCDMS
+conf['steps'][2]['datasets']['idis'].append(10017) ## deuteron | F2            | BCDMS
+conf['steps'][2]['datasets']['idis'].append(10020) ## proton   | F2            | NMC
+conf['steps'][2]['datasets']['idis'].append(10021) ## d/p      | F2d/F2p       | NMC
+conf['steps'][2]['datasets']['idis'].append(10026) ## proton   | sigma red     | HERA II NC e+ (1)
+conf['steps'][2]['datasets']['idis'].append(10027) ## proton   | sigma red     | HERA II NC e+ (2)
+conf['steps'][2]['datasets']['idis'].append(10028) ## proton   | sigma red     | HERA II NC e+ (3)
+conf['steps'][2]['datasets']['idis'].append(10029) ## proton   | sigma red     | HERA II NC e+ (4)
+conf['steps'][2]['datasets']['idis'].append(10030) ## proton   | sigma red     | HERA II NC e-
+conf['steps'][2]['datasets']['idis'].append(10031) ## proton   | sigma red     | HERA II CC e+
+conf['steps'][2]['datasets']['idis'].append(10032) ## proton   | sigma red     | HERA II NC e-
+
+## DIS with HERA
+## DY
+## fit only first shape of PDF
+conf['steps'][3] = {}
+conf['steps'][3]['dep'] = [2]
+conf['steps'][3]['active distributions'] = ['pdf', 'ppdf']
+conf['steps'][3]['passive distributions'] = ['ppdf']
+conf['steps'][3]['datasets'] = {}
+conf['steps'][3]['datasets']['idis'] = []
+conf['steps'][3]['datasets']['idis'].append(10010) # proton   | F2            | SLAC
+conf['steps'][3]['datasets']['idis'].append(10011) # deuteron | F2            | SLAC
+conf['steps'][3]['datasets']['idis'].append(10016) # proton   | F2            | BCDMS
+conf['steps'][3]['datasets']['idis'].append(10017) # deuteron | F2            | BCDMS
+conf['steps'][3]['datasets']['idis'].append(10020) # proton   | F2            | NMC
+conf['steps'][3]['datasets']['idis'].append(10021) # d/p      | F2d/F2p       | NMC
+conf['steps'][3]['datasets']['idis'].append(10026) # proton   | sigma red     | HERA II NC e+ (1)
+conf['steps'][3]['datasets']['idis'].append(10027) # proton   | sigma red     | HERA II NC e+ (2)
+conf['steps'][3]['datasets']['idis'].append(10028) # proton   | sigma red     | HERA II NC e+ (3)
+conf['steps'][3]['datasets']['idis'].append(10029) # proton   | sigma red     | HERA II NC e+ (4)
+conf['steps'][3]['datasets']['idis'].append(10030) # proton   | sigma red     | HERA II NC e-
+conf['steps'][3]['datasets']['idis'].append(10031) # proton   | sigma red     | HERA II CC e+
+conf['steps'][3]['datasets']['idis'].append(10032) # proton   | sigma red     | HERA II NC e-
+conf['steps'][3]['datasets']['dy'] = []
+conf['steps'][3]['datasets']['dy'].append(10001)
+conf['steps'][3]['datasets']['dy'].append(10002)
+
+## DIS with HERA
+## DY
+## jet Tevatron
+## fit only first shape of PDF
+conf['steps'][4] = {}
+conf['steps'][4]['dep'] = [3]
+conf['steps'][4]['active distributions'] = ['pdf', 'ppdf']
+conf['steps'][4]['passive distributions'] = ['ppdf']
+conf['steps'][4]['datasets'] = {}
+conf['steps'][4]['datasets']['idis'] = []
+conf['steps'][4]['datasets']['idis'].append(10010) # proton   | F2            | SLAC
+conf['steps'][4]['datasets']['idis'].append(10011) # deuteron | F2            | SLAC
+conf['steps'][4]['datasets']['idis'].append(10016) # proton   | F2            | BCDMS
+conf['steps'][4]['datasets']['idis'].append(10017) # deuteron | F2            | BCDMS
+conf['steps'][4]['datasets']['idis'].append(10020) # proton   | F2            | NMC
+conf['steps'][4]['datasets']['idis'].append(10021) # d/p      | F2d/F2p       | NMC
+conf['steps'][4]['datasets']['idis'].append(10026) # proton   | sigma red     | HERA II NC e+ (1)
+conf['steps'][4]['datasets']['idis'].append(10027) # proton   | sigma red     | HERA II NC e+ (2)
+conf['steps'][4]['datasets']['idis'].append(10028) # proton   | sigma red     | HERA II NC e+ (3)
+conf['steps'][4]['datasets']['idis'].append(10029) # proton   | sigma red     | HERA II NC e+ (4)
+conf['steps'][4]['datasets']['idis'].append(10030) # proton   | sigma red     | HERA II NC e-
+conf['steps'][4]['datasets']['idis'].append(10031) # proton   | sigma red     | HERA II CC e+
+conf['steps'][4]['datasets']['idis'].append(10032) # proton   | sigma red     | HERA II NC e-
+conf['steps'][4]['datasets']['dy'] = []
+conf['steps'][4]['datasets']['dy'].append(10001)
+conf['steps'][4]['datasets']['dy'].append(10002)
+conf['steps'][4]['datasets']['jet'] = []
+conf['steps'][4]['datasets']['jet'].append(10001) ## D0 dataset
+conf['steps'][4]['datasets']['jet'].append(10002) ## CDF dataset
+
+## DIS with HERA
+## DY
+## jet Tevatron and RHIC
+## fit only first shape of PDF
+conf['steps'][5] = {}
+conf['steps'][5]['dep'] = [4]
+conf['steps'][5]['active distributions'] = ['pdf', 'ppdf']
+conf['steps'][5]['passive distributions'] = ['ppdf']
+conf['steps'][5]['datasets'] = {}
+conf['steps'][5]['datasets']['idis'] = []
+conf['steps'][5]['datasets']['idis'].append(10010) # proton   | F2            | SLAC
+conf['steps'][5]['datasets']['idis'].append(10011) # deuteron | F2            | SLAC
+conf['steps'][5]['datasets']['idis'].append(10016) # proton   | F2            | BCDMS
+conf['steps'][5]['datasets']['idis'].append(10017) # deuteron | F2            | BCDMS
+conf['steps'][5]['datasets']['idis'].append(10020) # proton   | F2            | NMC
+conf['steps'][5]['datasets']['idis'].append(10021) # d/p      | F2d/F2p       | NMC
+conf['steps'][5]['datasets']['idis'].append(10026) # proton   | sigma red     | HERA II NC e+ (1)
+conf['steps'][5]['datasets']['idis'].append(10027) # proton   | sigma red     | HERA II NC e+ (2)
+conf['steps'][5]['datasets']['idis'].append(10028) # proton   | sigma red     | HERA II NC e+ (3)
+conf['steps'][5]['datasets']['idis'].append(10029) # proton   | sigma red     | HERA II NC e+ (4)
+conf['steps'][5]['datasets']['idis'].append(10030) # proton   | sigma red     | HERA II NC e-
+conf['steps'][5]['datasets']['idis'].append(10031) # proton   | sigma red     | HERA II CC e+
+conf['steps'][5]['datasets']['idis'].append(10032) # proton   | sigma red     | HERA II NC e-
+conf['steps'][5]['datasets']['dy'] = []
+conf['steps'][5]['datasets']['dy'].append(10001)
+conf['steps'][5]['datasets']['dy'].append(10002)
+conf['steps'][5]['datasets']['jet'] = []
+conf['steps'][5]['datasets']['jet'].append(10001) ## D0 dataset
+conf['steps'][5]['datasets']['jet'].append(10002) ## CDF dataset
+conf['steps'][5]['datasets']['jet'].append(10003) ## STAR MB dataset
+conf['steps'][5]['datasets']['jet'].append(10004) ## STAR HT dataset
+
+## DIS with HERA
+## DY
+## jet Tevatron and RHIC
+## fit only first shape of PDF and fit with parameters c and d
+conf['steps'][6] = {}
+conf['steps'][6]['dep'] = [5]
+conf['steps'][6]['active distributions'] = ['pdf', 'ppdf']
+conf['steps'][6]['passive distributions'] = ['ppdf']
+conf['steps'][6]['datasets'] = {}
+conf['steps'][6]['datasets']['idis'] = []
+conf['steps'][6]['datasets']['idis'].append(10010) # proton   | F2            | SLAC
+conf['steps'][6]['datasets']['idis'].append(10011) # deuteron | F2            | SLAC
+conf['steps'][6]['datasets']['idis'].append(10016) # proton   | F2            | BCDMS
+conf['steps'][6]['datasets']['idis'].append(10017) # deuteron | F2            | BCDMS
+conf['steps'][6]['datasets']['idis'].append(10020) # proton   | F2            | NMC
+conf['steps'][6]['datasets']['idis'].append(10021) # d/p      | F2d/F2p       | NMC
+conf['steps'][6]['datasets']['idis'].append(10026) # proton   | sigma red     | HERA II NC e+ (1)
+conf['steps'][6]['datasets']['idis'].append(10027) # proton   | sigma red     | HERA II NC e+ (2)
+conf['steps'][6]['datasets']['idis'].append(10028) # proton   | sigma red     | HERA II NC e+ (3)
+conf['steps'][6]['datasets']['idis'].append(10029) # proton   | sigma red     | HERA II NC e+ (4)
+conf['steps'][6]['datasets']['idis'].append(10030) # proton   | sigma red     | HERA II NC e-
+conf['steps'][6]['datasets']['idis'].append(10031) # proton   | sigma red     | HERA II CC e+
+conf['steps'][6]['datasets']['idis'].append(10032) # proton   | sigma red     | HERA II NC e-
+conf['steps'][6]['datasets']['dy'] = []
+conf['steps'][6]['datasets']['dy'].append(10001)
+conf['steps'][6]['datasets']['dy'].append(10002)
+conf['steps'][6]['datasets']['jet'] = []
+conf['steps'][6]['datasets']['jet'].append(10001) ## D0 dataset
+conf['steps'][6]['datasets']['jet'].append(10002) ## CDF dataset
+conf['steps'][6]['datasets']['jet'].append(10003) ## STAR MB dataset
+conf['steps'][6]['datasets']['jet'].append(10004) ## STAR HT dataset
+
+## PIDIS
+## fit only PPDF
+conf['steps'][7] = {}
+conf['steps'][7]['dep'] = [6]
+conf['steps'][7]['active distributions'] = ['pdf', 'ppdf']
+conf['steps'][7]['passive distributions'] = ['pdf']
+conf['steps'][7]['datasets'] = {}
+conf['steps'][7]['datasets']['pidis'] = []
+conf['steps'][7]['datasets']['pidis'].append(10002) # 10002 | proton   | A1   | COMPASS         |          |
+conf['steps'][7]['datasets']['pidis'].append(10003) # 10003 | proton   | A1   | COMPASS         |          |
+conf['steps'][7]['datasets']['pidis'].append(10004) # 10004 | proton   | A1   | EMC             |          |
+conf['steps'][7]['datasets']['pidis'].append(10007) # 10007 | proton   | Apa  | HERMES          |          |
+conf['steps'][7]['datasets']['pidis'].append(10008) # 10008 | proton   | A2   | HERMES          |          |
+conf['steps'][7]['datasets']['pidis'].append(10017) # 10017 | proton   | Apa  | JLabHB(EG1DVCS) |          |
+conf['steps'][7]['datasets']['pidis'].append(10022) # 10022 | proton   | Apa  | SLAC(E143)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10023) # 10023 | proton   | Ape  | SLAC(E143)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10028) # 10028 | proton   | Ape  | SLAC(E155)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10029) # 10029 | proton   | Apa  | SLAC(E155)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10031) # 10031 | proton   | Atpe | SLAC(E155x)     |          |
+conf['steps'][7]['datasets']['pidis'].append(10032) # 10032 | proton   | Apa  | SLACE80E130     |          |
+conf['steps'][7]['datasets']['pidis'].append(10035) # 10035 | proton   | A1   | SMC             |          |
+conf['steps'][7]['datasets']['pidis'].append(10036) # 10036 | proton   | A1   | SMC             |          |
+conf['steps'][7]['datasets']['pidis'].append(10041) # 10041 | proton   | Apa  | JLabHB(EG1b)    | E =1 GeV |
+conf['steps'][7]['datasets']['pidis'].append(10042) # 10042 | proton   | Apa  | JLabHB(EG1b)    | E =2 GeV |
+conf['steps'][7]['datasets']['pidis'].append(10043) # 10043 | proton   | Apa  | JLabHB(EG1b)    | E =4 GeV |
+conf['steps'][7]['datasets']['pidis'].append(10044) # 10044 | proton   | Apa  | JLabHB(EG1b)    | E =5 GeV |
+conf['steps'][7]['datasets']['pidis'].append(10005) # 10005 | neutron  | A1   | HERMES          |          |
+conf['steps'][7]['datasets']['pidis'].append(10001) # 10001 | deuteron | A1   | COMPASS         |          |
+conf['steps'][7]['datasets']['pidis'].append(10006) # 10006 | deuteron | Apa  | HERMES          |          |
+conf['steps'][7]['datasets']['pidis'].append(10016) # 10016 | deuteron | Apa  | JLabHB(EG1DVCS) |          |
+conf['steps'][7]['datasets']['pidis'].append(10020) # 10020 | deuteron | Ape  | SLAC(E143)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10021) # 10021 | deuteron | Apa  | SLAC(E143)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10026) # 10026 | deuteron | Ape  | SLAC(E155)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10027) # 10027 | deuteron | Apa  | SLAC(E155)      |          |
+conf['steps'][7]['datasets']['pidis'].append(10030) # 10030 | deuteron | Atpe | SLAC(E155x)     |          |
+conf['steps'][7]['datasets']['pidis'].append(10033) # 10033 | deuteron | A1   | SMC             |          |
+conf['steps'][7]['datasets']['pidis'].append(10034) # 10034 | deuteron | A1   | SMC             |          |
+conf['steps'][7]['datasets']['pidis'].append(10037) # 10037 | deuteron | Apa  | JLabHB(EG1b)    | E =1 GeV |
+conf['steps'][7]['datasets']['pidis'].append(10038) # 10038 | deuteron | Apa  | JLabHB(EG1b)    | E =2 GeV |
+conf['steps'][7]['datasets']['pidis'].append(10039) # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
+conf['steps'][7]['datasets']['pidis'].append(10040) # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
 
 ## PIDIS
 ## polarized jet RHIC

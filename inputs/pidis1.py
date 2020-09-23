@@ -4,14 +4,14 @@ conf = {}
 ## block comment can not appear as this file will be executed by 'exec'
 ## setup posterior sampling
 
-conf['bootstrap'] = False
+conf['bootstrap'] = True
 conf['flat par'] = False
 conf['ftol'] = 1e-8
 
-#conf['pidis grid'] = {}
-#conf['pidis grid']['overwrite'] = False
-#conf['pidis grid']['xlsx'] = []
-#conf['pidis grid']['xlsx'].append('%s/database/pidis/expdata/90001.xlsx'%os.environ['FITPACK'])
+conf['pidis grid'] = {}
+conf['pidis grid']['overwrite'] = False
+conf['pidis grid']['xlsx'] = []
+conf['pidis grid']['xlsx'].append('%s/database/pidis/expdata/90001.xlsx'%os.environ['FITPACK'])
 
 ## setup qcd evolution
 
@@ -27,6 +27,8 @@ conf['nuc'] = True
 conf['offshell'] = False
 # conf['sidis nuc smearing'] = False
 # conf['hq'] = False
+
+
 
 ## datasets
 
@@ -75,29 +77,6 @@ conf['datasets']['dy']['xlsx'][10002] = 'dy/expdata/10002.xlsx'
 conf['datasets']['dy']['norm'] = {}
 conf['datasets']['dy']['norm'][10001] = {'value': 1, 'fixed': False, 'min': 0.8, 'max': 1.2}
 conf['datasets']['dy']['norm'][10002] = {'value': 1, 'fixed': False, 'min': 0.8, 'max': 1.2}
-
-## lepton
-conf['datasets']['wzrv']={}
-conf['datasets']['wzrv']['filters']=[]
-conf['datasets']['wzrv']['xlsx']={}
-conf['datasets']['wzrv']['norm']={}
-#---------------------------------------------------------------------------------------------------------------------------
-conf['datasets']['wzrv']['xlsx'][1000]='wzrv/expdata/1000.xlsx'
-conf['datasets']['wzrv']['xlsx'][1001]='wzrv/expdata/1001.xlsx'
-conf['datasets']['wzrv']['xlsx'][2000]='wzrv/expdata/2000.xlsx'
-conf['datasets']['wzrv']['xlsx'][2003]='wzrv/expdata/2003.xlsx'
-conf['datasets']['wzrv']['xlsx'][2006]='wzrv/expdata/2006.xlsx'
-conf['datasets']['wzrv']['xlsx'][2007]='wzrv/expdata/2007.xlsx'
-conf['datasets']['wzrv']['xlsx'][2008]='wzrv/expdata/2008.xlsx'
-conf['datasets']['wzrv']['xlsx'][2009]='wzrv/expdata/2009.xlsx'
-conf['datasets']['wzrv']['xlsx'][2010]='wzrv/expdata/2010.xlsx'
-conf['datasets']['wzrv']['xlsx'][2011]='wzrv/expdata/2011.xlsx'
-conf['datasets']['wzrv']['xlsx'][2012]='wzrv/expdata/2012.xlsx'
-conf['datasets']['wzrv']['xlsx'][2013]='wzrv/expdata/2013.xlsx'
-conf['datasets']['wzrv']['xlsx'][2014]='wzrv/expdata/2014.xlsx'
-#---------------------------------------------------------------------------------------------------------------------------
-conf['datasets']['wzrv']['norm'][1000]={'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
-conf['datasets']['wzrv']['norm'][1001]={'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
 
 ## JET
 conf['datasets']['jet'] = {}
@@ -157,7 +136,7 @@ conf['datasets']['pidis']['xlsx'][10038] = 'pidis/expdata/10038.xlsx' # 10038 | 
 conf['datasets']['pidis']['xlsx'][10039] = 'pidis/expdata/10039.xlsx' # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
 conf['datasets']['pidis']['xlsx'][10040] = 'pidis/expdata/10040.xlsx' # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
 ## --------------------------------------------------------------------------------------------------------------------------
-conf['datasets']['pidis']['xlsx'][90001] = 'pidis/expdata/90001.xlsx' # 90001 | proton   | A_PV | JAM4EIC         |          |
+conf['datasets']['pidis']['xlsx'][90001] = 'pidis/expdata/90001.xlsx' # 90001 | proton   | A_PV | JAM4EIC   
 ## --------------------------------------------------------------------------------------------------------------------------
 conf['datasets']['pidis']['norm'] = {}
 conf['datasets']['pidis']['norm'][10002] = {'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
@@ -252,12 +231,13 @@ conf['params']['pdf']['sea2 b']  = {'value':    6, 'min':     0, 'max':    10, '
 
 ## ppdf parameters
 conf['su2+su3'] = 'su2'
+conf['ppdf_choice'] = 'valence'
 conf['params']['ppdf'] = {}
 
 conf['params']['ppdf']['g1 N']    = {'value':    1.54709e+00, 'min':   -10, 'max':    10, 'fixed': False}
 conf['params']['ppdf']['g1 a']    = {'value':   -7.13518e-01, 'min': -0.99, 'max':     2, 'fixed': False}
 conf['params']['ppdf']['g1 b']    = {'value':    9.45902e-01, 'min':     0, 'max':    10, 'fixed': False}
-conf['params']['ppdf']['g1 d']    = {'value':    0.000000000, 'min':   -10, 'max':    10, 'fixed': False}
+conf['params']['ppdf']['g1 d']    = {'value':    0.21230e+00, 'min': -1000, 'max':    10, 'fixed': False}
 
 conf['params']['ppdf']['uv1 N']   = {'value':    3.47549e-01, 'min':   -10, 'max':    10, 'fixed': True }
 conf['params']['ppdf']['uv1 a']   = {'value':    2.92830e-01, 'min':  -0.5, 'max':     2, 'fixed': False}
@@ -348,7 +328,8 @@ conf['steps'] = {}
 #conf['steps'][8]['datasets']['pjet'].append(20005) ## PHENIX 2011 paper on 2005 data
 #conf['steps'][8]['datasets']['pjet'].append(20006) ## STAR 2019 paper on 2012 data
 
-#--add RHIC
+
+#--add PVDIS EIC data
 conf['steps'][9] = {}
 conf['steps'][9]['dep'] = [6, 8]
 conf['steps'][9]['active distributions'] = ['pdf', 'ppdf']
@@ -388,6 +369,7 @@ conf['steps'][9]['datasets']['pidis'].append(10037) # 10037 | deuteron | Apa  | 
 conf['steps'][9]['datasets']['pidis'].append(10038) # 10038 | deuteron | Apa  | JLabHB(EG1b)    | E =2 GeV |
 conf['steps'][9]['datasets']['pidis'].append(10039) # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
 conf['steps'][9]['datasets']['pidis'].append(10040) # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
+conf['steps'][9]['datasets']['pidis'].append(90001)
 conf['steps'][9]['datasets']['pjet'] = []
 conf['steps'][9]['datasets']['pjet'].append(20001) ## STAR 2006 paper on 2003 and 2004 data
 conf['steps'][9]['datasets']['pjet'].append(20002) ## STAR 2012 paper on 2005 data
@@ -395,20 +377,6 @@ conf['steps'][9]['datasets']['pjet'].append(20003) ## STAR 2012 paper on 2006 da
 conf['steps'][9]['datasets']['pjet'].append(20004) ## STAR 2015 paper on 2009 data
 conf['steps'][9]['datasets']['pjet'].append(20005) ## PHENIX 2011 paper on 2005 data
 conf['steps'][9]['datasets']['pjet'].append(20006) ## STAR 2019 paper on 2012 data
-conf['steps'][9]['datasets']['wzrv'] = []
-conf['steps'][9]['datasets']['wzrv'].append(1000) 
-conf['steps'][9]['datasets']['wzrv'].append(1001) 
-
-
-
-
-
-
-
-
-
-
-
 
 
 
