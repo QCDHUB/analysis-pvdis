@@ -88,14 +88,14 @@ force = False
 #########################
 ##--Simulation for PVDIS
 #########################
-kind  = 'e'
-tar   = 'd'
+kind  = 'had'
+tar   = 'p'
 est   = 'opt'
-obs   = 'mean'
+obs   = 'max'
 lum   = '100:fb-1'
 force = False
 
-pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,lum=lum,force=force)
+#pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,lum=lum,force=force)
 
 ######################
 ##--Initial Processing
@@ -103,11 +103,11 @@ pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,lum=lum,force=force)
 FILT = []
 #FILT.append(('g1 N',-2.0,'less'))
 
-#inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
-#predict.get_predictions(wdir,force=False)
-#classifier.gen_labels(wdir,kc)
-#jar.gen_jar_file(wdir,kc)
-#summary.print_summary(wdir,kc)
+inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
+predict.get_predictions(wdir,force=False)
+classifier.gen_labels(wdir,kc)
+jar.gen_jar_file(wdir,kc)
+summary.print_summary(wdir,kc)
 
 ###################
 ##--Optimize priors

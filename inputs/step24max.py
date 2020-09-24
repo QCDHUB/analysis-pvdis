@@ -57,10 +57,10 @@ conf['datasets']['idis']['xlsx'][10033]='idis/expdata/10033.xlsx' # n/d      | F
 #------------------------------------------------------------------------------------------------------------------
 conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90001.xlsx' # proton   | A_PV | mean
 conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90002.xlsx' # deuteron | A_PV | mean
-conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90011.xlsx' # proton   | A_PV | min
-conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90012.xlsx' # deuteron | A_PV | min
-conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90021.xlsx' # proton   | A_PV | max
-conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90022.xlsx' # deuteron | A_PV | max
+conf['datasets']['idis']['xlsx'][90011]='idis/expdata/90011.xlsx' # proton   | A_PV | min
+conf['datasets']['idis']['xlsx'][90012]='idis/expdata/90012.xlsx' # deuteron | A_PV | min
+conf['datasets']['idis']['xlsx'][90021]='idis/expdata/90021.xlsx' # proton   | A_PV | max
+conf['datasets']['idis']['xlsx'][90022]='idis/expdata/90022.xlsx' # deuteron | A_PV | max
 #------------------------------------------------------------------------------------------------------------------
 conf['datasets']['idis']['norm']={}
 conf['datasets']['idis']['norm'][10002]={'value':    1.00000e+00, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
