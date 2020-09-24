@@ -31,13 +31,13 @@ from qcdlib.aux import AUX
 from qcdlib.alphaS import ALPHAS
 from qcdlib.eweak import EWEAK
 
-def pvdis(wdir,kind='e',tar='p',est='opt',lum='100:fb-1',force=True):
+def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',lum='100:fb-1',force=True):
 
     #--generate initial data file
-    gen_pvdis_xlsx(wdir,kind,tar,est)
+    gen_pvdis_xlsx(wdir,kind,tar,est,obs)
 
     #--modify conf with new data file
-    conf = gen_conf(wdir,kind,tar,est)
+    conf = gen_conf(wdir,kind,tar,est,obs)
 
     #--get predictions on new data file if not already done
     print('Generating predictions...')
@@ -45,17 +45,18 @@ def pvdis(wdir,kind='e',tar='p',est='opt',lum='100:fb-1',force=True):
     predict.get_predictions(wdir,force=force,mod_conf=conf,name=name)
 
     #--update tables
-    update_tabs(wdir,kind,tar,est,lum)
+    update_tabs(wdir,kind,tar,est,obs,lum)
 
     #--plot errors
-    plot_errors(wdir,kind,tar,est,lum)
+    plot_errors(wdir,kind,tar,est,obs,lum)
 
     #--generate lhapdf info and data files
-    gen_lhapdf_info_file(wdir,kind,tar,est)
-    gen_lhapdf_dat_file (wdir,kind,tar,est)
+    if obs=='mean':
+        gen_lhapdf_info_file(wdir,kind,tar,est,obs)
+        gen_lhapdf_dat_file (wdir,kind,tar,est,obs)
 
 #--generate pseudo-data
-def gen_pvdis_xlsx(wdir,kind,tar,est):
+def gen_pvdis_xlsx(wdir,kind,tar,est,_obs):
 
     checkdir('%s/sim'%wdir)
 
@@ -86,11 +87,11 @@ def gen_pvdis_xlsx(wdir,kind,tar,est):
         data['norm_c'].append(0.0)
 
     df=pd.DataFrame(data)
-    filename = '%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est)
+    filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,_obs)
     df.to_excel(filename, index=False)
     print('Generating xlsx file and saving to %s'%filename)
 
-def gen_conf(wdir,kind,tar,est):
+def gen_conf(wdir,kind,tar,est,obs):
 
     print('Modifying config with new experimental data file...')
 
@@ -104,7 +105,7 @@ def gen_conf(wdir,kind,tar,est):
 
     #--placeholder index
     idx = 90000
-    conf['datasets'][exp]['xlsx'][idx]='./%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est)
+    conf['datasets'][exp]['xlsx'][idx]='./%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs)
     conf['steps'][istep]['datasets'][exp].append(idx)
 
     fn   = [conf['datasets'][exp]['xlsx'][idx]]
@@ -125,7 +126,7 @@ def gen_conf(wdir,kind,tar,est):
 
     return conf
 
-def update_tabs(wdir,kind,tar,est,lum):
+def update_tabs(wdir,kind,tar,est,obs,lum):
 
     istep=core.get_istep()
     data=load('%s/data/predictions-%d-pvdis-%s-%s-%s.dat'%(wdir,istep,kind,tar,est))
@@ -156,7 +157,11 @@ def update_tabs(wdir,kind,tar,est,lum):
         except: continue
 
     #--save mean value
-    tab['value']=np.mean(tab['prediction-rep'],axis=0)
+    if obs=='mean': tab['value'] = np.mean(tab['prediction-rep'],axis=0)
+
+    #--adjust to +-1 sigma of mean value
+    if obs=='min':  tab['value'] = np.mean(tab['prediction-rep'],axis=0) - np.std(tab['prediction-rep'],axis=0)
+    if obs=='max':  tab['value'] = np.mean(tab['prediction-rep'],axis=0) + np.std(tab['prediction-rep'],axis=0)
 
     #--save individual values
     for i in range(len(tab['prediction-rep'])):
@@ -164,19 +169,19 @@ def update_tabs(wdir,kind,tar,est,lum):
 
     del tab['prediction-rep']
 
-    if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,tab['value'],lum)
-    if kind == 'had': tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_had_errors(wdir,kind,tar,est,tab['value'],lum)
+    if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,obs,tab['value'],lum)
+    if kind == 'had': tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_had_errors(wdir,kind,tar,est,obs,tab['value'],lum)
 
     df=pd.DataFrame(tab)
-    filename = '%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est)
+    filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs)
     df.to_excel(filename, index=False)
     print('Updating xlsx file and saving to %s'%filename)
 
-def A_PV_e_errors(wdir,kind,tar,est,value,lum):
+def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
 
     conf['aux'] = AUX()
     conf['eweak'] = EWEAK()
-    data = pd.read_excel('%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est), index=False)
+    data = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs), index=False)
     data = data.to_dict(orient='list')
     l    = len(value)
 
@@ -327,11 +332,11 @@ def A_PV_e_errors(wdir,kind,tar,est,value,lum):
 
     return data['stat_u'],data['syst_u'],data['norm_c']
 
-def A_PV_had_errors(wdir,kind,tar,est,value,lum):
+def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
 
     conf['aux'] = AUX()
     conf['eweak'] = EWEAK()
-    data = pd.read_excel('%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est), index=False)
+    data = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs), index=False)
     data = data.to_dict(orient='list')
     target=data['target'][0]
     l    = len(data['value'])
@@ -487,13 +492,13 @@ def convert_lum(lum):
     if units=='fb-1':   return lum*one*1e12
     else:               sys.exit('units not convertible!')
 
-def plot_errors(wdir,kind,tar,est,lum):
+def plot_errors(wdir,kind,tar,est,obs,lum):
 
     nrows,ncols=1,1
     fig = py.figure(figsize=(ncols*8,nrows*5))
     ax11=py.subplot(nrows,ncols,1)
 
-    tab   = pd.read_excel('%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est))
+    tab   = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs))
     tab   = tab.to_dict(orient='list')
     X     = np.array(tab['X'])
     value = np.array(tab['value'])
@@ -557,7 +562,7 @@ def plot_errors(wdir,kind,tar,est,lum):
     py.clf()
 
 #--generate lhapdf info and data files
-def gen_lhapdf_info_file(wdir,kind,tar,est):
+def gen_lhapdf_info_file(wdir,kind,tar,est,obs):
 
     info={}
     if kind == 'e':   info['<description>'] = 'PVDIS (electron)'
@@ -568,7 +573,7 @@ def gen_lhapdf_info_file(wdir,kind,tar,est):
     info['<particle>']    = '%s'%tar
 
     #--get tables
-    X,Q2,table,replicas=get_tables(wdir,kind,tar,est)
+    X,Q2,table,replicas=get_tables(wdir,kind,tar,est,obs)
 
     #--kinematic limits
     xmin=X[0]
@@ -638,10 +643,10 @@ def gen_lhapdf_info_file(wdir,kind,tar,est):
     tab.close()
     print('Saving lhapdf info file to %s/lhapdf/%s/%s.info'%(wdir,dirname,dirname))
 
-def gen_lhapdf_dat_file(wdir,kind,tar,est):
+def gen_lhapdf_dat_file(wdir,kind,tar,est,obs):
 
     #--get tables
-    X,Q2,central,replicas=get_tables(wdir,kind,tar,est)
+    X,Q2,central,replicas=get_tables(wdir,kind,tar,est,obs)
     nx=len(X)
     nQ2=len(Q2)
     nrep = len(replicas)
@@ -711,9 +716,9 @@ def gen_lhapdf_dat_file(wdir,kind,tar,est):
 
     print('Saving lhapdf data files inside %s/lhapdf/%s'%(wdir,dirname))
 
-def get_tables(wdir,kind,tar,est):
+def get_tables(wdir,kind,tar,est,obs):
     replicas = []
-    tab=pd.read_excel('%s/sim/pvdis-%s-%s-%s.xlsx'%(wdir,kind,tar,est))
+    tab=pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs))
     tab=tab.to_dict(orient='list')
     central = tab['value']
     _replicas = {}

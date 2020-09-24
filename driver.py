@@ -10,20 +10,8 @@ from analysis.qpdlib import pdf
 from analysis.qpdlib import ppdf
 
 #--from obslib
-from analysis.obslib  import stf
-from analysis.obslib  import off
-from analysis.obslib  import ht
-
 from analysis.obslib  import sin2w
-
-from analysis.obslib  import idis
-from analysis.obslib  import dy
-from analysis.obslib  import wasym
-from analysis.obslib  import zrap
-from analysis.obslib  import wzrv
 from analysis.obslib  import pvdis
-#from analysis.obslib  import AL
-from analysis.obslib import data
 
 #--from parlib
 from analysis.parlib  import params
@@ -100,13 +88,14 @@ force = False
 #########################
 ##--Simulation for PVDIS
 #########################
-kind  = 'had'
-tar   = 'p'
+kind  = 'e'
+tar   = 'd'
 est   = 'opt'
+obs   = 'mean'
 lum   = '100:fb-1'
-force = True
+force = False
 
-#pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,lum=lum,force=force)
+pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,lum=lum,force=force)
 
 ######################
 ##--Initial Processing
