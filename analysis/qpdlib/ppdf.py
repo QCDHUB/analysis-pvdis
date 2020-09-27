@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 import matplotlib
 matplotlib.use('Agg')
+matplotlib.rcParams['text.latex.preview']=True
 import pylab as py
 
 from scipy.integrate import quad
@@ -567,16 +568,17 @@ def plot_moments(PLOT,kc,mode=0,name=''):
       replicas=core.get_replicas(wdir)
 
       X=data['X']
-      for mom in data['MOM']:
+      #for mom in data['MOM']:
+      for mom in ['G','Sigma']:
           mean = np.mean(data['MOM'][mom],axis=0)
           std = np.std(data['MOM'][mom],axis=0)
 
           if j == 0:
-              if mom=='Sigma': color,label = 'red'     ,r'$\Delta \Sigma \rm{EIC}$' 
-              if mom=='G':     color,label = 'blue'    ,r'$\Delta G \rm{EIC}$'
+              if mom=='Sigma': color,alpha,label = 'red'     ,1.0,r'$\Delta \Sigma \rm{EIC}$' 
+              if mom=='G':     color,alpha,label = 'blue'    ,1.0,r'$\Delta G \rm{EIC}$'
           if j == 1:
-              if mom=='Sigma': color,label = 'green'   ,r'$\Delta \Sigma$' 
-              if mom=='G':     color,label = 'orange'  ,r'$\Delta G$'
+              if mom=='Sigma': color,alpha,label = 'orange'  ,0.3,r'$\Delta \Sigma$' 
+              if mom=='G':     color,alpha,label = 'cyan'  ,0.3,r'$\Delta G$'
           ax = ax11 
 
           #--plot each replica
@@ -586,8 +588,8 @@ def plot_moments(PLOT,kc,mode=0,name=''):
         
           #--plot average and standard deviation
           if mode==1:
-              thy_plot[(j,mom)] ,= ax.plot(X,mean,style,color=color)
-              thy_band[(j,mom)]  = ax.fill_between(X,mean-std,mean+std,color=color,alpha=0.2)
+              #thy_plot[(j,mom)] ,= ax.plot(X,mean,style,color=color)
+              thy_band[(j,mom)]  = ax.fill_between(X,mean-std,mean+std,color=color,alpha=alpha)
 
       j+=1
 
@@ -610,16 +612,18 @@ def plot_moments(PLOT,kc,mode=0,name=''):
   ax11.xaxis.set_label_coords(0.95,0.0)
 
   handles = []
-  handles.append((thy_band[(1,'Sigma')],thy_plot[(1,'Sigma')]))
-  handles.append((thy_band[(1,'G')],thy_plot[(1,'G')]))
-  handles.append((thy_band[(0,'Sigma')],thy_plot[(0,'Sigma')]))
-  handles.append((thy_band[(0,'G')],thy_plot[(0,'G')]))
+  handles.append(thy_band[(0,'Sigma')])
+  handles.append(thy_band[(0,'G')])
+  handles.append(thy_band[(1,'Sigma')])
+  handles.append(thy_band[(1,'G')])
 
   labels = []
+  labels.append(r'$\Delta \Sigma~\rm{(EIC~A_{PV}^p)}$')
+  labels.append(r'$\Delta G~\rm{(EIC~A_{PV}^p)}$')
+  #labels.append(r'$\Delta \Sigma~\rm{(PVDIS)}$')
+  #labels.append(r'$\Delta G~\rm{(PVDIS)}$')
   labels.append(r'$\Delta \Sigma$')
   labels.append(r'$\Delta G$')
-  labels.append(r'$\Delta \Sigma~\rm{(EIC)}$')
-  labels.append(r'$\Delta G~\rm{(EIC)}$')
   ax11.legend(handles,labels,loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
  
   py.tight_layout()
