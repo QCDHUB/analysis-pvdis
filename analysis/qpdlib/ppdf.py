@@ -529,6 +529,7 @@ def gen_moments(wdir,Q2 = 1.27**2):
                 _func   = np.array([func(xeval(x)[i]) for i in range(len(z))])
                 moms[j] = np.sum(w*jac(x)*_func)
 
+            MOM[moment].append(moms)
             #MOM[moment].append([quad(func,x,1.0)[0] for x in X])
 
 
