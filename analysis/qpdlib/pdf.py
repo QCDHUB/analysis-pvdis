@@ -362,13 +362,10 @@ def plot_xf_strange(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
         #ax.set_xticks([0.01,0.1,1])
         #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$1$'])
 
-  ax11.set_ylabel(r'\boldmath$xf(x)$',size=30)
+  #ax11.set_ylabel(r'\boldmath$xf(x)$',size=30)
   ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
 
   ax11.set_ylim(0,1.5)    ,ax11.set_yticks([0,0.5,1.0,1.5])
-
-  ax11.set_ylabel(r'$xf(x)$',size=30)
-  ax11.set_xlabel(r'$x$'    ,size=30)
 
   ax11.text(0.7,0.8,r'\boldmath{$x(s+\bar{s})$}', transform=ax11.transAxes,size=25)
 
@@ -383,106 +380,18 @@ def plot_xf_strange(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
   py.savefig(filename)
   print 'Saving figure to %s'%filename
 
-def plot_xf_strange_std(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
-  #--mode 0: plot each replica
-  #--mode 1: plot average and standard deviation of replicas 
+def plot_xf_std_ratio(PLOT,kc,name=''):
 
   nrows,ncols=1,1
   fig = py.figure(figsize=(ncols*7,nrows*4))
   ax11=py.subplot(nrows,ncols,1)
 
-  filename = '%s/gallery/pdfs-strange-std'%PLOT[0][0]
-  if mode==1: filename += '-bands'
-
-  filename += name
-
-  j = 0
-  for plot in PLOT:
-
-      wdir, Q2, color, style, label, alpha = plot[0], plot[1], plot[2], plot[3], plot[4], plot[5]
-      load_config('%s/input.py'%wdir)
-      istep=core.get_istep()
-
-      #--load data if it exists
-      try:
-          if Q2==1.27**2: data=load('%s/data/pdf-%d.dat'%(wdir,istep))
-          else: data=load('%s/data/pdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
-      #--generate data and then load it if it does not exist
-      except:
-          gen_xf(wdir,Q2)
-          if Q2==1.27**2: data=load('%s/data/pdf-%d.dat'%(wdir,istep))
-          else: data=load('%s/data/pdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
-          
-      replicas=core.get_replicas(wdir)
-      cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
-      best_cluster=cluster_order[0]
-
-      X=data['X']
-      X1 = data['X'][:100]
-      X2 = data['X'][100:]
-
-
-      ax11.plot([],[],label=label,color=color)
-      for flav in data['XF']:
-          mean = np.mean(data['XF'][flav],axis=0)
-          std = np.std(data['XF'][flav],axis=0)
-
-          if flav=='s+sb':           ax = ax11
-          else: continue
-
-          #--plot std over mean
-          ax.plot(X,std/mean,style,color=color)
-
-      j+=1
-
-
-  for ax in [ax11]:
-        ax.set_xlim(1e-4,1)
-        ax.semilogx()
-          
-        ax.tick_params(axis='both', which='major', top=True, right=True, direction='in',labelsize=25,length=5  ,width=1.5)
-        ax.tick_params(axis='both', which='minor', top=True, right=True, direction='in',labelsize=25,length=2.5,width=1.5)
-        ax.set_xticks([0.01,0.1,1])
-        ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$1$'])
-
-  ax11.set_ylim(-0.15,0.15) #,ax21.set_yticks([0,0.2,0.4,0.6])
-
-  ax11.set_ylabel(r'\boldmath$xf(x)$',size=30)
-  ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
-
-  ax11.set_ylim(0,0.1) ,ax11.set_yticks([0,0.02,0.04,0.06,0.08,0.10])
-
-  ax11.set_ylabel(r'$\sigma_s/s$',size=30)
-  ax11.set_xlabel(r'$x$'    ,size=30)
-
-  if Q2 == 1.27**2: ax11.text(0.50,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
-  else:             ax11.text(0.50,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
-
-  if len(PLOT) > 1: ax11.legend(loc='upper left', fontsize = 25, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
-  py.tight_layout()
-
-  filename+='.png'
-
-  checkdir('%s/gallery'%wdir)
-  py.savefig(filename)
-  print 'Saving figure to %s'%filename
-
-def plot_xf_strange_std_ratio(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
-  #--mode 0: plot each replica
-  #--mode 1: plot average and standard deviation of replicas 
-
-  nrows,ncols=1,1
-  fig = py.figure(figsize=(ncols*7,nrows*4))
-  ax11=py.subplot(nrows,ncols,1)
-
-  filename = '%s/gallery/pdfs-strange-std-ratio'%PLOT[0][0]
-  if mode==1: filename += '-bands'
+  filename = '%s/gallery/pdfs-std-ratio'%PLOT[0][0]
 
   filename += name
 
   #--first PLOT entry is no EIC
   #--further PLOT entries are EIC
-
 
   j = 0
 
@@ -510,9 +419,9 @@ def plot_xf_strange_std_ratio(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
 
   denom = {}
   for flav in data['XF']:
-      if flav=='s+sb':
-          denom = np.std(data['XF'][flav],axis=0)
+      denom[flav] = np.std(data['XF'][flav],axis=0)
 
+  hand = {}
   for plot in PLOT:
       j+=1
       if j == 1: continue
@@ -539,19 +448,21 @@ def plot_xf_strange_std_ratio(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
       X1 = data['X'][:100]
       X2 = data['X'][100:]
 
-
-      ax11.plot([],[],label=label,color=color)
       for flav in data['XF']:
           mean = np.mean(data['XF'][flav],axis=0)
           std = np.std(data['XF'][flav],axis=0)
 
-          if flav=='s+sb':           ax = ax11
+          if flav=='uv':      color = 'red'  
+          elif flav=='dv':    color = 'orange'  
+          elif flav=='db+ub': color = 'yellow' 
+          elif flav=='db-ub': color = 'green' 
+          elif flav=='g':     color = 'blue'  
+          elif flav=='s+sb':  color = 'cyan'
           else: continue
+          ax = ax11
 
           #--plot std over denom
-          ax.plot(X,std/denom,style,color=color)
-
-
+          hand[flav] ,= ax.plot(X,std/denom[flav],style,color=color,lw=5)
 
   for ax in [ax11]:
         ax.set_xlim(1e-4,0.5)
@@ -569,13 +480,30 @@ def plot_xf_strange_std_ratio(PLOT,kc,mode=0,name='',SETS=[],nrep=None):
 
   ax11.set_ylim(0,1.2) ,ax11.set_yticks([0,0.2,0.4,0.6,0.8,1.0])
 
-  ax11.set_ylabel(r'$\sigma_s^{EIC}/\sigma_s$',size=30)
-  ax11.set_xlabel(r'$x$'    ,size=30)
+  ax11.set_ylabel(r'$\sigma^{EIC}/\sigma$',size=30)
+  ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
+  ax11.xaxis.set_label_coords(0.95,0.00)
 
-  if Q2 == 1.27**2: ax11.text(0.50,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
-  else:             ax11.text(0.50,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+  if Q2 == 1.27**2: ax11.text(0.05,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
+  else:             ax11.text(0.05,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
 
-  #if len(PLOT) > 1: ax11.legend(loc='upper left', fontsize = 25, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+  handles = []
+  handles.append(hand['uv'])
+  handles.append(hand['dv'])
+  handles.append(hand['db+ub'])
+  handles.append(hand['db-ub'])
+  handles.append(hand['s+sb'])
+  handles.append(hand['g'])
+
+  labels = []
+  labels.append(r'$u_v$')
+  labels.append(r'$d_v$')
+  labels.append(r'$\bar{d} + \bar{u}$')
+  labels.append(r'$\bar{d} - \bar{u}$')
+  labels.append(r'$s + \bar{s}$')
+  labels.append(r'$g$')
+
+  ax11.legend(handles,labels,loc='lower right', fontsize = 15, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 3, columnspacing = 1.0)
   py.tight_layout()
 
   filename+='.png'
@@ -589,9 +517,8 @@ def plot_xf(PLOT,kc,kind=0,mode=0,name='',SETS=[],nrep=None):
     if kind==0:
         plot_xf_main(PLOT,kc,mode=0,name='',SETS=[],nrep=None)
         plot_xf_strange(PLOT,kc,mode=0,name='',SETS=[],nrep=None)
-        plot_xf_strange_std(PLOT,kc,mode=0,name='',SETS=[],nrep=None)
     if kind==1:
-        plot_xf_strange_std_ratio(PLOT,kc,mode=0,name='',SETS=[],nrep=None)
+        plot_xf_std_ratio(PLOT,kc,name='')
 
 
 

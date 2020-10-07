@@ -167,6 +167,22 @@ def update_tabs(wdir,kind,tar,est,obs,lum):
     for i in range(len(tab['prediction-rep'])):
         tab['value%s'%(i+1)] = tab['prediction-rep'][i]
 
+    #--test distribution
+    nrows,ncols=1,1
+    fig = py.figure(figsize=(ncols*8,nrows*5))
+    ax11=py.subplot(nrows,ncols,1)
+
+    idx = np.array([i for i in range(len(tab['prediction-rep']))])
+    points = sorted(np.array(tab['prediction-rep']).T[0])
+    ax11.scatter(idx,points)
+    ax11.set_ylim(-5e-7,5e-7)
+    ax11.axhline(np.mean(tab['prediction-rep'],axis=0)[0],0,1)
+    ax11.axhline(np.mean(tab['prediction-rep'],axis=0)[0]-np.std(tab['prediction-rep'],axis=0)[0],0,1,color='black')
+    ax11.axhline(np.mean(tab['prediction-rep'],axis=0)[0]+np.std(tab['prediction-rep'],axis=0)[0],0,1,color='black')
+
+    #py.savefig('test.png')
+    py.clf()
+
     del tab['prediction-rep']
 
     if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,obs,tab['value'],lum)
@@ -199,7 +215,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
     S  = RS**2
 
     M2 = conf['aux'].M2
-    if tar=='d': M2 = 4*M2
+    #if tar=='d': M2 = 4*M2
 
     #--luminosity
     lum = convert_lum(lum)
@@ -228,80 +244,76 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
         idis.data['n']['FLgZ'] = np.zeros(idis.X.size)
         idis.data['n']['F3gZ'] = np.zeros(idis.X.size)
 
-    idis._update()
+    #--get average over replicas
+    istep = sorted(conf['steps'])[-1]
+    jar   = load('%s/data/jar-%d.dat'%(wdir,istep))
+    parman.order = jar['order']
+    replicas = jar['replicas']
+  
+    F2g, FLg, F2gZ, FLgZ, F3gZ = 0,0,0,0,0
+    for i in range(len(replicas)):
+        lprint('Generating stastical errors: %s/%s'%(i+1,len(replicas)))
+        par = replicas[i]
+        parman.set_new_params(par,initial=True)
+        idis._update()
+        F2g  += idis.get_stf(X,Q2,stf='F2g',tar=tar)
+        FLg  += idis.get_stf(X,Q2,stf='FLg',tar=tar)
+        F2gZ += idis.get_stf(X,Q2,stf='F2gZ',tar=tar)
+        FLgZ += idis.get_stf(X,Q2,stf='FLgZ',tar=tar)
+        F3gZ += idis.get_stf(X,Q2,stf='F3gZ',tar=tar)
+ 
+    print
+ 
+    F2g  /= len(replicas) 
+    FLg  /= len(replicas)
+    F2gZ /= len(replicas)
+    FLgZ /= len(replicas)
+    F3gZ /= len(replicas)
 
-    F2g  = lambda x,q2: idis.get_stf(x,q2,stf='F2g' ,tar=tar) 
-    FLg  = lambda x,q2: idis.get_stf(x,q2,stf='FLg' ,tar=tar) 
-    F2gZ = lambda x,q2: idis.get_stf(x,q2,stf='F2gZ',tar=tar) 
-    FLgZ = lambda x,q2: idis.get_stf(x,q2,stf='FLgZ',tar=tar) 
-    F3gZ = lambda x,q2: idis.get_stf(x,q2,stf='F3gZ',tar=tar) 
+    rho2 =  1 + 4*X**2*M2/Q2
 
-    rho2 = lambda x,q2: 1 + 4*x**2*M2/q2
+    y= (Q2/2/X)/((S-M2)/2)
 
-    y=lambda x,q2: (q2/2/x)/((S-M2)/2)
+    YP = y**2*(rho2+1)/2 - 2*y +2
+    YM = 1-(1-y)**2
 
-    YP = lambda x,q2: y(x,q2)**2*(rho2(x,q2)+1)/2 - 2*y(x,q2) +2
-    YM = lambda x,q2: 1-(1-y(x,q2))**2
-
-    sin2w = lambda q2: conf['eweak'].get_sin2w(q2)
-    alpha = lambda q2: conf['eweak'].get_alpha(q2)
+    sin2w = np.array([conf['eweak'].get_sin2w(q2) for q2 in Q2])
+    alpha = np.array([conf['eweak'].get_alpha(q2) for q2 in Q2])
 
     gA = -0.5
-    gV = lambda q2: -0.5 + 2*sin2w(q2)
+    gV = -0.5 + 2*sin2w
 
-    C  = lambda q2: GF*q2/(2*np.sqrt(2)*np.pi*alpha(q2))
+    C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
   
-    C1 = lambda x,q2: np.pi*alpha(q2)**2/(x*y(x,q2)*q2)
+    C1 = np.pi*alpha**2/(X*y*Q2)
 
-    T1g  = lambda x,q2: YP(x,q2)*F2g(x,q2)  - y(x,q2)**2*FLg(x,q2)
-    T1gZ = lambda x,q2: YP(x,q2)*F2gZ(x,q2) - y(x,q2)**2*FLgZ(x,q2)
+    T1g  = YP*F2g  - y**2*FLg
+    T1gZ = YP*F2gZ - y**2*FLgZ
 
-    T2 = lambda x,q2: x*YM(x,q2)*F3gZ(x,q2)
+    T2 = X*YM*F3gZ
 
-    _ddsigR = lambda x,q2: C1(x,q2)*(T1g(x,q2) + C(q2)*(gV(q2)-gA)*(T1gZ(x,q2) - T2(x,q2)))
-    _ddsigL = lambda x,q2: C1(x,q2)*(T1g(x,q2) + C(q2)*(gV(q2)+gA)*(T1gZ(x,q2) + T2(x,q2)))
+    sigR = C1*(T1g + C*(gV-gA)*(T1gZ - T2))
+    sigL = C1*(T1g + C*(gV+gA)*(T1gZ + T2))
 
-    #--integrate over bin
-    z1,w1 = np.polynomial.legendre.leggauss(3)
-    z2,w2 = np.polynomial.legendre.leggauss(3)
-
-    ddsigR = np.zeros((len(X),len(z1),len(z2)))
-    ddsigL = np.zeros((len(X),len(z1),len(z2)))
-    for i in range(len(X)):
-        _x   = 0.5*((Xup[i] -Xdo[i])*z1  + Xup[i]  + Xdo[i])
-        _q2  = 0.5*((Q2up[i]-Q2do[i])*z2 + Q2up[i] + Q2do[i])
-        xjac  = 0.5*(Xup[i] -Xdo[i])
-        q2jac = 0.5*(Q2up[i]-Q2do[i])
-        for j in range(len(_x)):
-            for k in range(len(_q2)):
-                ddsigR[i][j][k] = _ddsigR(_x[j],_q2[k])*xjac*q2jac
-                ddsigL[i][j][k] = _ddsigL(_x[j],_q2[k])*xjac*q2jac
-   
-    #--integrate over Q2
-    dsigR = np.sum(w2*ddsigR,axis=2) 
-    dsigL = np.sum(w2*ddsigL,axis=2) 
-
-    #--integrate over X
-    sigR = np.sum(w1*dsigR,axis=1) 
-    sigL = np.sum(w1*dsigL,axis=1) 
-
-    #--Jacobian dQ2/dy
-    yjac = X*S
+    ##--Jacobian d/dy -> d/dQ2
+    yjac = 1/(X*S)
 
     #--assuming same luminosity
-    NR = lum*sigR*yjac
-    NL = lum*sigL*yjac
+    NR = lum*sigR*yjac*bins
+    NL = lum*sigL*yjac*bins
 
-    #--theory asymmetry
-    A = np.array(value)
- 
-    #--absolute uncertainty (not divided by sigma) 
-    stat2 = (1 + A**2)/(NR + NL)
+    a = (NR-NL)/(NR+NL)
+
+    #--% uncertainty (not divided by sigma) 
+    stat2 = (1 + a**2)/(NR + NL)/(a**2)
 
     stat = np.sqrt(stat2)
 
+    #--theory asymmetry
+    A = np.array(value)
+
     #--statistical uncertainty
-    data['stat_u'] = stat
+    data['stat_u'] = stat*A
 
     #--normalization uncertainty
     pol   = 0.01   #polarization
@@ -355,7 +367,7 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
 
     M2 = conf['aux'].M2
 
-    if tar=='d': M2 = 4*M2
+    #if tar=='d': M2 = 4*M2
 
     #--luminosity
     lum = convert_lum(lum)
@@ -379,85 +391,82 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
     idis   = resman.idis_thy
     pidis  = resman.pidis_thy
 
-    idis._update()
-    pidis._update()
+    #--get average over replicas
+    istep = sorted(conf['steps'])[-1]
+    jar   = load('%s/data/jar-%d.dat'%(wdir,istep))
+    parman.order = jar['order']
+    replicas = jar['replicas']
+  
+    g1gZ, g5gZ, F2g, FLg, F2gZ, FLgZ, F3gZ = 0,0,0,0,0,0,0
+    for i in range(len(replicas)):
+        lprint('Generating stastical errors: %s/%s'%(i+1,len(replicas)))
+        par = replicas[i]
+        parman.set_new_params(par,initial=True)
+        idis._update()
+        pidis._update()
+        g1gZ += pidis.get_stf(X,Q2,stf='g1gZ',tar=tar) 
+        g5gZ += pidis.get_stf(X,Q2,stf='g5gZ',tar=tar) 
+        F2g  += idis .get_stf(X,Q2,stf='F2g'  ,tar=tar) 
+        FLg  += idis .get_stf(X,Q2,stf='FLg'  ,tar=tar) 
+        F2gZ += idis .get_stf(X,Q2,stf='F2gZ' ,tar=tar) 
+        FLgZ += idis .get_stf(X,Q2,stf='FLgZ' ,tar=tar) 
+        F3gZ += idis .get_stf(X,Q2,stf='F3gZ' ,tar=tar) 
+ 
+    print
+ 
+    g1gZ /= len(replicas) 
+    g5gZ /= len(replicas) 
+    F2g  /= len(replicas) 
+    FLg  /= len(replicas) 
+    F2gZ /= len(replicas) 
+    FLgZ /= len(replicas) 
+    F3gZ /= len(replicas) 
+ 
+    rho2 = 1 + 4*X**2*M2/Q2
 
-    g1gZ = lambda x,q2: pidis.get_stf(x,q2,stf='g1gZ',tar=tar) 
-    g5gZ = lambda x,q2: pidis.get_stf(x,q2,stf='g5gZ',tar=tar) 
-    F2g  = lambda x,q2: idis.get_stf(x,q2,stf='F2g'  ,tar=tar) 
-    FLg  = lambda x,q2: idis.get_stf(x,q2,stf='FLg'  ,tar=tar) 
-    F2gZ = lambda x,q2: idis.get_stf(x,q2,stf='F2gZ' ,tar=tar) 
-    FLgZ = lambda x,q2: idis.get_stf(x,q2,stf='FLgZ' ,tar=tar) 
-    F3gZ = lambda x,q2: idis.get_stf(x,q2,stf='F3gZ' ,tar=target) 
+    y = (Q2/2/X)/((S-M2)/2)
 
-    rho2 = lambda x,q2: 1 + 4*x**2*M2/q2
+    YP = y**2 - 2*y +2
+    YM = 1-(1-y)**2
 
-    y=lambda x,q2: (q2/2/x)/((S-M2)/2)
-
-    YP = lambda x,q2: y(x,q2)**2 - 2*y(x,q2) +2
-    YM = lambda x,q2: 1-(1-y(x,q2))**2
-
-    sin2w = lambda q2: conf['eweak'].get_sin2w(q2)
-    alpha = lambda q2: conf['eweak'].get_alpha(q2)
+    sin2w = np.array([conf['eweak'].get_sin2w(q2) for q2 in Q2])
+    alpha = np.array([conf['eweak'].get_alpha(q2) for q2 in Q2])
 
     gA = -0.5
-    gV = lambda q2: -0.5 + 2*sin2w(q2)
+    gV = -0.5 + 2*sin2w
 
-    C  = lambda q2: GF*q2/(2*np.sqrt(2)*np.pi*alpha(q2))
+    C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
   
-    C1 = lambda x,q2: np.pi*alpha(q2)**2/(x*y(x,q2)*q2)
+    C1 = np.pi*alpha**2/(X*y*Q2)
 
-    T1g  = lambda x,q2: YP(x,q2)*F2g(x,q2)  - y(x,q2)**2*FLg(x,q2)
-    T1gZ = lambda x,q2: YP(x,q2)*F2gZ(x,q2) - y(x,q2)**2*FLgZ(x,q2)
+    T1g  = YP*F2g  - y**2*FLg
+    T1gZ = YP*F2gZ - y**2*FLgZ
 
-    T2 = lambda x,q2: x*YM(x,q2)*F3gZ(x,q2)
+    T2 = X*YM*F3gZ
 
-    T3 = lambda x,q2: YP(x,q2)*gV(q2)*g5gZ(x,q2) + YM(x,q2)*gA*g1gZ(x,q2)
+    T3 = YP*gV*g5gZ + YM*gA*g1gZ
 
-    _ddsigR = lambda x,q2: C1(x,q2)*(T1g(x,q2) + C(q2)*(gV(q2)*T1gZ(x,q2) + gA*T2(x,q2)) + 2*x*C(q2)*T3(x,q2))
-    _ddsigL = lambda x,q2: C1(x,q2)*(T1g(x,q2) + C(q2)*(gV(q2)*T1gZ(x,q2) + gA*T2(x,q2)) - 2*x*C(q2)*T3(x,q2))
+    sigR = C1*(T1g + C*(gV*T1gZ + gA*T2) + 2*X*C*T3)
+    sigL = C1*(T1g + C*(gV*T1gZ + gA*T2) - 2*X*C*T3)
 
-    #--integrate over bin
-    z1,w1 = np.polynomial.legendre.leggauss(3)
-    z2,w2 = np.polynomial.legendre.leggauss(3)
+    ##--Jacobian d/dy -> d/dQ2
+    yjac = 1/(X*S)
 
-    ddsigR = np.zeros((len(X),len(z1),len(z2)))
-    ddsigL = np.zeros((len(X),len(z1),len(z2)))
-    for i in range(len(X)):
-        _x   = 0.5*((Xup[i] -Xdo[i])*z1  + Xup[i]  + Xdo[i])
-        _q2  = 0.5*((Q2up[i]-Q2do[i])*z2 + Q2up[i] + Q2do[i])
-        xjac  = 0.5*(Xup[i] -Xdo[i])
-        q2jac = 0.5*(Q2up[i]-Q2do[i])
-        for j in range(len(_x)):
-            for k in range(len(_q2)):
-                ddsigR[i][j][k] = _ddsigR(_x[j],_q2[k])*xjac*q2jac
-                ddsigL[i][j][k] = _ddsigL(_x[j],_q2[k])*xjac*q2jac
-   
-    #--integrate over Q2
-    dsigR = np.sum(w2*ddsigR,axis=2) 
-    dsigL = np.sum(w2*ddsigL,axis=2) 
+    NR = lum*sigR*yjac*bins
+    NL = lum*sigL*yjac*bins
 
-    #--integrate over X
-    sigR = np.sum(w1*dsigR,axis=1) 
-    sigL = np.sum(w1*dsigL,axis=1) 
+    a = (NR-NL)/(NR+NL)
 
-
-    #--Jacobian dQ2/dy
-    yjac = X*S
-
-    NR = lum*sigR*yjac
-    NL = lum*sigL*yjac
-
-    #--theory asymmetry
-    A = np.array(value)
- 
-    #--absolute uncertainty (not divided by sigma) 
-    stat2 = (1 + A**2)/(NR + NL)
+    #--% uncertainty
+    stat2 = np.abs((1 + a**2)/(NR + NL)/(a**2))
 
     stat = np.sqrt(stat2)
 
+    #--theory asymmetry
+    A = np.array(value)
+
     #--statistical uncertainties
-    data['stat_u'] = stat
+    data['stat_u'] = stat*A
 
     #--normalization uncertainty
     pol   = 0.02   #polarization
@@ -495,7 +504,7 @@ def convert_lum(lum):
 def plot_errors(wdir,kind,tar,est,obs,lum):
 
     nrows,ncols=1,1
-    fig = py.figure(figsize=(ncols*8,nrows*5))
+    fig = py.figure(figsize=(ncols*9,nrows*5))
     ax11=py.subplot(nrows,ncols,1)
 
     tab   = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs))
@@ -517,35 +526,35 @@ def plot_errors(wdir,kind,tar,est,obs,lum):
     hand['stat']  = ax11.scatter(X,stat ,color='green'  ,s=10,marker='o')
     hand['syst']  = ax11.scatter(X,syst ,color='magenta',s=10,marker='v')
 
-    ax11.set_xlim(1e-4,1)
+    ax11.set_xlim(2e-5,1)
     ax11.semilogx()
     ax11.semilogy()
 
     if kind == 'e':
-        ax11.set_ylim(1e-4,1e-1)
-        ax11.set_ylabel(r'$|\sigma_{A_{PV}^e}/A_{PV}^e|$',size=30)
+        #ax11.set_ylim(1e-4,1e-1)
+        ax11.set_ylabel(r'\boldmath$|\sigma_{A_{PV}^e}/A_{PV}^e|$',size=30)
         #if est == 'opt': ax11.text(0.6,0.4,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
         #if est == 'mod': ax11.text(0.6,0.4,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
         #if est == 'pes': ax11.text(0.6,0.4,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
     if kind == 'had':
-        ax11.set_ylim(1e-3,1e3)
+        #ax11.set_ylim(1e-3,1e3)
         ax11.set_yticks([1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3])
         locmin = matplotlib.ticker.LogLocator(base=10.0,subs=(0.2,0.4,0.6,0.8),numticks=7)
         ax11.yaxis.set_minor_locator(locmin)
         ax11.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-        ax11.set_ylabel(r'$|\sigma_{A_{PV}^{had}}/A_{PV}^{had}|$',size=30)
+        ax11.set_ylabel(r'\boldmath$|\sigma_{A_{PV}^{p}}/A_{PV}^{p}|$',size=30)
         #if est == 'opt': ax11.text(0.6,0.6,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
         #if est == 'mod': ax11.text(0.6,0.6,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
         #if est == 'pes': ax11.text(0.6,0.6,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
 
 
-    ax11.set_xlabel(r'$x$',size=30)
+    ax11.set_xlabel(r'\boldmath$x$',size=30)
 
     ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=30)
 
 
-    if tar == 'p':   ax11.text(0.7,0.85,r'\textrm{Proton}'     ,transform = ax11.transAxes,size=30)
-    if tar == 'd':   ax11.text(0.7,0.85,r'\textrm{Deuteron}'   ,transform = ax11.transAxes,size=30)
+    if tar == 'p':   ax11.text(0.05,0.85,r'\textrm{Proton}'     ,transform = ax11.transAxes,size=30)
+    if tar == 'd':   ax11.text(0.05,0.85,r'\textrm{Deuteron}'   ,transform = ax11.transAxes,size=30)
 
     handles = [hand['alpha'],hand['stat'],hand['syst']]
     label1 = r'\textbf{\textrm{Total}}'
@@ -556,7 +565,7 @@ def plot_errors(wdir,kind,tar,est,obs,lum):
     ax11.legend(handles,labels,loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
     py.tight_layout()
     checkdir('%s/gallery'%wdir)
-    filename = '%s/gallery/pvdis-errors-%s-%s-%s'%(wdir,kind,tar,est)
+    filename = '%s/gallery/pvdis-errors-%s-%s-%s-%s'%(wdir,kind,tar,est,obs)
     py.savefig(filename)
     print('Saving error plot to %s'%filename)
     py.clf()

@@ -88,10 +88,10 @@ force = False
 #########################
 ##--Simulation for PVDIS
 #########################
-kind  = 'had'
-tar   = 'p'
+kind  = 'e'
+tar   = 'd'
 est   = 'opt'
-obs   = 'max'
+obs   = 'mean'
 lum   = '100:fb-1'
 force = False
 
@@ -101,13 +101,15 @@ force = False
 ##--Initial Processing
 ######################
 FILT = []
-#FILT.append(('g1 N',-2.0,'less'))
+FILT.append(('dv1 c',-25,'less'))
+#FILT.append(('g1 a',-0.5,'less'))
+#FILT.append(('uv1 b', 0.1,'less'))
 
-inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
-predict.get_predictions(wdir,force=False)
-classifier.gen_labels(wdir,kc)
-jar.gen_jar_file(wdir,kc)
-summary.print_summary(wdir,kc)
+#inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
+#predict.get_predictions(wdir,force=False)
+#classifier.gen_labels(wdir,kc)
+#jar.gen_jar_file(wdir,kc)
+#summary.print_summary(wdir,kc)
 
 ###################
 ##--Optimize priors
@@ -139,13 +141,15 @@ SETS = []
 hist=False
 
 #params.plot_params(wdir,'pdf',kc,hist)
+#params.plot_params(wdir,'eweak',kc,hist)
 
 ####################
 ##--Observable plots
 ####################
 
-#pvdis.plot_obs(wdir,kc,'e')
-#pvdis.plot_obs(wdir,kc,'had')
+pvdis.plot_obs(wdir,kc,'e','p')
+pvdis.plot_obs(wdir,kc,'e','d')
+#pvdis.plot_obs(wdir,kc,'had','p')
 
 
 ##---------------------------------------------------------------
@@ -160,6 +164,10 @@ PSETS = []
 
 #ppdf.gen_xf(wdir,Q2=Q2)         
 #ppdf.plot_xf(PLOT,kc,mode=0,name='',PSETS=PSETS)
+
+#--moments
+#ppdf.gen_moments(wdir,Q2=Q2)         
+#ppdf.plot_moments(PLOT,kc,mode=1)
 
 ###########################
 ##--Parameter distributions
