@@ -57,10 +57,6 @@ conf['datasets']['idis']['xlsx'][10033]='idis/expdata/10033.xlsx' # n/d      | F
 #------------------------------------------------------------------------------------------------------------------
 conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90001.xlsx' # proton   | A_PV | mean
 conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90002.xlsx' # deuteron | A_PV | mean
-conf['datasets']['idis']['xlsx'][90011]='idis/expdata/90011.xlsx' # proton   | A_PV | min
-conf['datasets']['idis']['xlsx'][90012]='idis/expdata/90012.xlsx' # deuteron | A_PV | min
-conf['datasets']['idis']['xlsx'][90021]='idis/expdata/90021.xlsx' # proton   | A_PV | max
-conf['datasets']['idis']['xlsx'][90022]='idis/expdata/90022.xlsx' # deuteron | A_PV | max
 #------------------------------------------------------------------------------------------------------------------
 conf['datasets']['idis']['norm']={}
 conf['datasets']['idis']['norm'][10002]={'value':    1.00000e+00, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
@@ -401,7 +397,7 @@ conf['ht']    = True
 conf['ht type'] = 'mult'
 conf['offshell'] = True
 conf['steps'][24]={}
-conf['steps'][24]['dep']=[23]
+conf['steps'][24]['dep']=[22,23]
 conf['steps'][24]['active distributions']=['pdf','ht4','off','eweak']
 conf['steps'][24]['passive distributions']=[]
 #------------------------------------------------------------------------------------------------------------------
@@ -423,8 +419,8 @@ conf['steps'][24]['datasets']['idis'].append(10032) # proton   | sigma red     |
 conf['steps'][24]['datasets']['idis'].append(10002) # deuteron | F2            | JLab Hall C (E00-106)
 conf['steps'][24]['datasets']['idis'].append(10003) # proton   | F2            | JLab Hall C (E00-106)
 conf['steps'][24]['datasets']['idis'].append(10033) # n/d      | F2n/F2d       | BONUS
-conf['steps'][24]['datasets']['idis'].append(90021) # proton   | A_PV | max
-conf['steps'][24]['datasets']['idis'].append(90022) # deuteron | A_PV | max
+conf['steps'][24]['datasets']['idis'].append(90001) # proton   | A_PV | mean
+conf['steps'][24]['datasets']['idis'].append(90002) # deuteron | A_PV | mean
 conf['steps'][24]['datasets']['dy']=[]
 conf['steps'][24]['datasets']['dy'].append(10001)
 conf['steps'][24]['datasets']['dy'].append(10002)
