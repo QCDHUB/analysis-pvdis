@@ -55,6 +55,9 @@ conf['datasets']['idis']['xlsx'][10006]='idis/expdata/10006.xlsx' # deuteron | F
 conf['datasets']['idis']['xlsx'][10002]='idis/expdata/10002.xlsx' # deuteron | F2            | JLab Hall C (E00-106)
 conf['datasets']['idis']['xlsx'][10033]='idis/expdata/10033.xlsx' # n/d      | F2n/F2d       | BONUS
 #------------------------------------------------------------------------------------------------------------------
+conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90001.xlsx' # proton   | A_PV
+conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90002.xlsx' # deuteron | A_PV
+#------------------------------------------------------------------------------------------------------------------
 conf['datasets']['idis']['norm']={}
 conf['datasets']['idis']['norm'][10002]={'value':    1.00000e+00, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
 conf['datasets']['idis']['norm'][10003]={'value':    1.00000e+00, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
@@ -179,9 +182,9 @@ conf['params']['pdf']['sea1 N']  ={'value':    5.71081196e-03, 'min':     0, 'ma
 conf['params']['pdf']['sea1 a']  ={'value':   -1.36329697e+00, 'min':  -1.9, 'max':    -1, 'fixed': False}
 conf['params']['pdf']['sea1 b']  ={'value':    4.74721050e+00, 'min':     0, 'max':   100, 'fixed': False}
 
-conf['params']['pdf']['sea2 N']  ={'value':       2.08640e-02, 'min':     0, 'max':     1, 'fixed': 'sea1 N'}
-conf['params']['pdf']['sea2 a']  ={'value':      -1.500000000, 'min':  -1.9, 'max':    -1, 'fixed': 'sea1 a'}
-conf['params']['pdf']['sea2 b']  ={'value':       1.00000e+01, 'min':     0, 'max':    20, 'fixed': 'sea1 b'}
+conf['params']['pdf']['sea2 N']  ={'value':       2.08640e-02, 'min':     0, 'max':     1, 'fixed': False}
+conf['params']['pdf']['sea2 a']  ={'value':      -1.500000000, 'min':  -1.9, 'max':    -1, 'fixed': False}
+conf['params']['pdf']['sea2 b']  ={'value':       1.00000e+01, 'min':     0, 'max':   100, 'fixed': False}
 
 
 #--ht params (NOTE: What's being fitted here is the (M^2/Q^2) and (m^2/Q^2) correction H. To get the correction to FX, take H/Q^2)
@@ -303,15 +306,18 @@ conf['steps']={}
 #conf['steps'][21]['datasets']['wzrv'].append(2015)
 
 #------------------------------------------------------------------------------------------------------------------
-#--fit weak mixing angle with pdfs fixed
+#--fit asymmetric sea
 conf['tmc']   = 'AOT'
 conf['ht']    = True
 conf['ht type'] = 'mult'
 conf['offshell'] = True
 conf['steps'][22]={}
 conf['steps'][22]['dep']=[21]
-conf['steps'][22]['active distributions']=['eweak']
-conf['steps'][22]['passive distributions']=['pdf','ht4','off']
+conf['steps'][22]['active distributions']=['pdf','ht4','off']
+conf['steps'][22]['passive distributions']=[]
+conf['params']['pdf']['sea2 N']['prior'] = 'sea1 N'
+conf['params']['pdf']['sea2 a']['prior'] = 'sea1 a'
+conf['params']['pdf']['sea2 b']['prior'] = 'sea1 b'
 #------------------------------------------------------------------------------------------------------------------
 conf['steps'][22]['datasets']={}
 conf['steps'][22]['datasets']['idis']=[]
@@ -331,8 +337,27 @@ conf['steps'][22]['datasets']['idis'].append(10032) # proton   | sigma red     |
 conf['steps'][22]['datasets']['idis'].append(10002) # deuteron | F2            | JLab Hall C (E00-106)
 conf['steps'][22]['datasets']['idis'].append(10003) # proton   | F2            | JLab Hall C (E00-106)
 conf['steps'][22]['datasets']['idis'].append(10033) # n/d      | F2n/F2d       | BONUS
-
-
+conf['steps'][22]['datasets']['dy']=[]
+conf['steps'][22]['datasets']['dy'].append(10001)
+conf['steps'][22]['datasets']['dy'].append(10002)
+conf['steps'][22]['datasets']['zrap']=[]
+conf['steps'][22]['datasets']['zrap'].append(1000)
+conf['steps'][22]['datasets']['zrap'].append(1001)
+conf['steps'][22]['datasets']['wasym']=[]
+conf['steps'][22]['datasets']['wasym'].append(1000)
+conf['steps'][22]['datasets']['wasym'].append(1001)
+conf['steps'][22]['datasets']['wzrv']=[]
+conf['steps'][22]['datasets']['wzrv'].append(2000)
+conf['steps'][22]['datasets']['wzrv'].append(2003)
+conf['steps'][22]['datasets']['wzrv'].append(2006)
+conf['steps'][22]['datasets']['wzrv'].append(2007)
+conf['steps'][22]['datasets']['wzrv'].append(2009)
+conf['steps'][22]['datasets']['wzrv'].append(2010)
+conf['steps'][22]['datasets']['wzrv'].append(2011)
+conf['steps'][22]['datasets']['wzrv'].append(2012)
+conf['steps'][22]['datasets']['wzrv'].append(2013)
+conf['steps'][22]['datasets']['wzrv'].append(2014)
+conf['steps'][22]['datasets']['wzrv'].append(2015)
 
 
 

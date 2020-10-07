@@ -136,7 +136,7 @@ conf['datasets']['pidis']['xlsx'][10038] = 'pidis/expdata/10038.xlsx' # 10038 | 
 conf['datasets']['pidis']['xlsx'][10039] = 'pidis/expdata/10039.xlsx' # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
 conf['datasets']['pidis']['xlsx'][10040] = 'pidis/expdata/10040.xlsx' # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
 ## --------------------------------------------------------------------------------------------------------------------------
-conf['datasets']['pidis']['xlsx'][90001] = 'pidis/expdata/90001.xlsx' # 90001 | proton   | A_PV | JAM4EIC   
+conf['datasets']['pidis']['xlsx'][90001] = 'pidis/expdata/90001.xlsx' # 90001 | proton   | A_PV | JAM4EIC | mean 
 ## --------------------------------------------------------------------------------------------------------------------------
 conf['datasets']['pidis']['norm'] = {}
 conf['datasets']['pidis']['norm'][10002] = {'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
