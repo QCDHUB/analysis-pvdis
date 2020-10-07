@@ -49,8 +49,10 @@ def plot_params(wdir,dist,kc,hist=False):
     order  = [z[i][0] for i in range(len(z))]
     params = [z[i][1] for i in range(len(z))]
 
+
     #--get names for organization
-    names = [(order[i].split()[0],order[i].split()[1]) for i in range(len(order))]
+    try: names = [(order[i].split()[0],order[i].split()[1]) for i in range(len(order))]
+    except: names = [(i,i) for i in range(len(order))]
     n0    = sorted(list(set(names[i][0] for i in range(len(names)))))
     n1    = sorted(list(set(names[i][1] for i in range(len(names)))))
 
