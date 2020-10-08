@@ -65,7 +65,7 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs):
 
     #--get specific points from data file at fitpack/database/pvdis/expdata/1000.xlsx
     fdir = os.environ['FITPACK']
-    grid = pd.read_excel(fdir + '/database/EIC/expdata/1000.xlsx')
+    grid = pd.read_excel(fdir + '/database/EIC/expdata/3000.xlsx')
     grid = grid.to_dict(orient='list')
     data['X']    = grid['X']
     data['Q2']   = grid['Q2']
@@ -211,7 +211,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
     dQ2 = Q2up - Q2do
     bins = dx*dQ2
 
-    RS = data['RS'][0]
+    RS = np.array(data['RS'])
     S  = RS**2
 
     M2 = conf['aux'].M2
@@ -272,7 +272,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
 
     rho2 =  1 + 4*X**2*M2/Q2
 
-    y= (Q2/2/X)/((S-M2)/2)
+    y= (Q2/2/X)/((S)/2)
 
     YP = y**2*(rho2+1)/2 - 2*y +2
     YM = 1-(1-y)**2
@@ -362,7 +362,7 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
     dQ2 = Q2up - Q2do
     bins = dx*dQ2
 
-    RS = data['RS'][0]
+    RS = np.array(data['RS'])
     S  = RS**2
 
     M2 = conf['aux'].M2
@@ -424,7 +424,7 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
  
     rho2 = 1 + 4*X**2*M2/Q2
 
-    y = (Q2/2/X)/((S-M2)/2)
+    y = (Q2/2/X)/((S)/2)
 
     YP = y**2 - 2*y +2
     YM = 1-(1-y)**2
