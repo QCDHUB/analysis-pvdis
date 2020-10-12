@@ -545,13 +545,13 @@ def plot_xf_strange_compare(PLOT,kc,name=''):
           mean = np.mean(data['XF'][flav],axis=0)
           std = np.std(data['XF'][flav],axis=0)
 
-          if j==0: color,alpha='cyan',0.3
-          if j==1: color,alpha='red',0.7
+          if j==0: color,alpha='cyan',1.0
+          if j==1: color,alpha='red',1.0
 
           if flav=='s+sb': ax = ax11
           else: continue
 
-          hand[j] = ax.fill_between(X,mean-std,mean+std,color=color,alpha=0.5)
+          hand[j] = ax.fill_between(X,mean-std,mean+std,color=color,alpha=alpha)
 
       j+=1
 

@@ -1,3 +1,4 @@
+import os
 conf = {}
 
 ## block comment can not appear as this file will be executed by 'exec'
@@ -7,6 +8,10 @@ conf['bootstrap'] = True
 conf['flat par'] = False
 conf['ftol'] = 1e-8
 
+conf['pidis grid'] = {}
+conf['pidis grid']['overwrite'] = False
+conf['pidis grid']['xlsx'] = []
+conf['pidis grid']['xlsx'].append('%s/database/pidis/expdata/90001.xlsx'%os.environ['FITPACK'])
 ## setup qcd evolution
 
 conf['alphaSmode'] = 'backward'
@@ -127,6 +132,8 @@ conf['datasets']['pidis']['xlsx'][10037] = 'pidis/expdata/10037.xlsx' # 10037 | 
 conf['datasets']['pidis']['xlsx'][10038] = 'pidis/expdata/10038.xlsx' # 10038 | deuteron | Apa  | JLabHB(EG1b)    | E =2 GeV |
 conf['datasets']['pidis']['xlsx'][10039] = 'pidis/expdata/10039.xlsx' # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
 conf['datasets']['pidis']['xlsx'][10040] = 'pidis/expdata/10040.xlsx' # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
+## --------------------------------------------------------------------------------------------------------------------------
+conf['datasets']['pidis']['xlsx'][90001] = 'pidis/expdata/90001.xlsx'
 ## --------------------------------------------------------------------------------------------------------------------------
 conf['datasets']['pidis']['norm'] = {}
 conf['datasets']['pidis']['norm'][10002] = {'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
@@ -508,6 +515,7 @@ conf['steps'][8]['datasets']['pidis'].append(10037) # 10037 | deuteron | Apa  | 
 conf['steps'][8]['datasets']['pidis'].append(10038) # 10038 | deuteron | Apa  | JLabHB(EG1b)    | E =2 GeV |
 conf['steps'][8]['datasets']['pidis'].append(10039) # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
 conf['steps'][8]['datasets']['pidis'].append(10040) # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
+conf['steps'][8]['datasets']['pidis'].append(90001)
 conf['steps'][8]['datasets']['pjet'] = []
 conf['steps'][8]['datasets']['pjet'].append(20001) ## STAR 2006 paper on 2003 and 2004 data
 conf['steps'][8]['datasets']['pjet'].append(20002) ## STAR 2012 paper on 2005 data

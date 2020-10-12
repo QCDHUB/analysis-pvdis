@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from tools.config import load_config,conf
 from fitlib.resman import RESMAN
 import numpy as np
@@ -15,7 +16,6 @@ from tools.tools import load,lprint
 
 #--from corelib
 from analysis.corelib import core,classifier
-
 
 def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
 
@@ -72,8 +72,8 @@ def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
         if mode == 1:
             mean = np.mean(np.array(sin2w),axis=0)
             std  = np.std(np.array(sin2w),axis=0)
-            ax11.plot(Q,mean,color=color)
-            ax11.fill_between(Q,mean-std,mean+std,color=color,alpha=0.5)
+            #ax11.plot(Q,mean,color=color)
+            ax11.fill_between(Q,mean-std,mean+std,color=color,alpha=1.0)
 
         print
  
@@ -91,7 +91,9 @@ def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
 
 
     #--plot EIC kinematics
-    Qmin = np.sqrt(2.5)
+    EIC = np.load('%s/database/EIC/3000.xlsx'%os.environ['FITPACK'])
+    Qmin = np.sqrt(EIC['Q2'])
+    Qmin = np.sqrt(2.6)
     Qmax = np.sqrt(3981.1)
     ax11.axvspan(Qmin,Qmax,alpha=0.2,color='darkcyan')
     ax11.text(5.0e0,0.226,r'\textrm{EIC}',size=20)
@@ -102,7 +104,7 @@ def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
 
     ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=15)
 
-    ax11.set_ylim(0.225,0.245)
+    ax11.set_ylim(0.224,0.246)
     #ax11.set_ylim(0.2,0.5)
 
     ax11.set_xlim(1e-3,1e3)

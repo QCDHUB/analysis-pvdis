@@ -375,5 +375,187 @@ def plot_pvdis_had(wdir,kc,tar):
             print
             print 'Saving A_PV hadron %s plot to %s'%(tar,filename)
 
+def compare(PLOT,kc,kind,tar):
+    if kind=='e':
+        compare_e(PLOT,kc,tar)
+    if kind=='had':
+        compare_had(PLOT,kc,tar)
+
+def compare_e(PLOT,kc,tar):
+
+    print('\ngenerating A_PV electron ratio')
+    nrows,ncols=1,1
+    fig = py.figure(figsize=(ncols*7,nrows*4))
+    ax11 = py.subplot(nrows,ncols,1)
+    data = {}
+    for j in range(len(PLOT)):
+        wdir = PLOT[j][0]
+        load_config('%s/input.py'%wdir)
+        istep=core.get_istep()
+        predictions = load('%s/data/predictions-%d.dat'%(wdir,istep))
+
+        conf['aux']=aux.AUX()
+        conf['datasets'] = {}
+        conf['datasets']['idis']={}
+        conf['datasets']['idis']['xlsx']={}
+
+        if tar == 'p': conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90001.xlsx'
+        if tar == 'd': conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90002.xlsx'
+
+        conf['datasets']['idis']['norm']={}
+        conf['datasets']['idis']['filters']=[]
+        conf['datasets']['idis']['filters'].append('W2>3')
+        conf['datasets']['idis']['filters'].append('Q2>1.69')
+        conf['idis tabs']=READER().load_data_sets('idis')
+        tables = conf['idis tabs'].keys()
+
+        replicas=core.get_replicas(wdir)
+        core.mod_conf(istep,replicas[0]) #--set conf as specified in istep   
+   
+        resman=RESMAN(nworkers=1,parallel=False,datasets=False)
+        parman=resman.parman
+
+        jar=load('%s/data/jar-%d.dat'%(wdir,istep))
+        replicas=jar['replicas']
+        parman.order=jar['order']
+
+        data[j] = predictions['reactions']['idis']
+
+        cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc)
+
+        for idx in data[j]:
+            predictions = copy.copy(data[j][idx]['prediction-rep'])
+            del data[j][idx]['prediction-rep']
+            del data[j][idx]['residuals-rep']
+            for ic in range(kc.nc[istep]):
+                predictions_ic = [predictions[i] for i in range(len(predictions)) if cluster[i] == ic]
+                data[j][idx]['thy-%d' % ic] = np.mean(predictions_ic, axis = 0)
+                data[j][idx]['dthy-%d' % ic] = np.std(predictions_ic, axis = 0)
+
+    hand = {}
+    #--plot data
+    for idx in tables:
+        X  = conf['idis tabs'][idx]['X']
+        q2 = conf['idis tabs'][idx]['Q2']
+        #--average asymmetry and standard deviation       
+        theory1  = data[0][idx]['thy-0']
+        dtheory1 = data[0][idx]['dthy-0']
+        theory2  = data[1][idx]['thy-0']
+        dtheory2 = data[1][idx]['dthy-0']
+        rat = np.array(dtheory2)/np.array(dtheory1)
+        hand = ax11.scatter(X,rat,color='firebrick',s=20)
+                
+    ax11.axhline(1,0,1,alpha=1.0,color='black',ls='--')
+    ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
+    ax11.set_xlim(3e-4,1.0)
+    ax11.set_ylim(0.0,1.40)
+    ax11.semilogx()
+    ax11.set_xlabel(r'\boldmath$x$',size=30)
+    ax11.xaxis.set_label_coords(0.95,0.00)
+    ax11.set_xticks([1e-3,1e-2,1e-1])
+    ax11.text(0.05,0.05,r'\boldmath$\sigma^{\rm{EIC}}/\sigma$',transform=ax11.transAxes,size=40)
+
+    handles = [hand]
+    label1  = r'\boldmath$A_{PV}^{e(%s)}$'%tar
+    labels  = [label1]
+    ax11.legend(handles,labels,loc='lower right', fontsize = 25, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+
+    py.tight_layout()
+    py.subplots_adjust(hspace=0)
+    checkdir('%s/gallery'%wdir)
+    filename='%s/gallery/pvdis_e_%s-compare.png'%(wdir,tar)
+
+    py.savefig(filename)
+    py.clf()
+    print
+    print 'Saving A_PV electron comparison %s plot to %s'%(tar,filename)
+
+def compare_had(PLOT,kc,tar):
+
+    print('\ngenerating A_PV hadron ratio')
+    nrows,ncols=1,1
+    fig = py.figure(figsize=(ncols*7,nrows*4))
+    ax11 = py.subplot(nrows,ncols,1)
+    data = {}
+    for j in range(len(PLOT)):
+        wdir = PLOT[j][0]
+        load_config('%s/input.py'%wdir)
+        istep=core.get_istep()
+        predictions = load('%s/data/predictions-%d.dat'%(wdir,istep))
+
+        conf['aux']=aux.AUX()
+        conf['datasets'] = {}
+        conf['datasets']['pidis']={}
+        conf['datasets']['pidis']['xlsx']={}
+
+        if tar == 'p': conf['datasets']['pidis']['xlsx'][90001]='pidis/expdata/90001.xlsx'
+
+        conf['datasets']['pidis']['norm']={}
+        conf['datasets']['pidis']['filters']=[]
+        conf['datasets']['pidis']['filters'].append('W2>10')
+        conf['datasets']['pidis']['filters'].append('Q2>1.69')
+        conf['pidis tabs']=READER().load_data_sets('pidis')
+        tables = conf['pidis tabs'].keys()
+
+        replicas=core.get_replicas(wdir)
+        core.mod_conf(istep,replicas[0]) #--set conf as specified in istep   
+   
+        resman=RESMAN(nworkers=1,parallel=False,datasets=False)
+        parman=resman.parman
+
+        jar=load('%s/data/jar-%d.dat'%(wdir,istep))
+        replicas=jar['replicas']
+        parman.order=jar['order']
+
+        data[j] = predictions['reactions']['pidis']
+
+        cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc)
+
+        for idx in data[j]:
+            predictions = copy.copy(data[j][idx]['prediction-rep'])
+            del data[j][idx]['prediction-rep']
+            del data[j][idx]['residuals-rep']
+            for ic in range(kc.nc[istep]):
+                predictions_ic = [predictions[i] for i in range(len(predictions)) if cluster[i] == ic]
+                data[j][idx]['thy-%d' % ic] = np.mean(predictions_ic, axis = 0)
+                data[j][idx]['dthy-%d' % ic] = np.std(predictions_ic, axis = 0)
+
+    hand = {}
+    #--plot data
+    for idx in tables:
+        X  = conf['pidis tabs'][idx]['X']
+        q2 = conf['pidis tabs'][idx]['Q2']
+        #--average asymmetry and standard deviation       
+        theory1  = data[0][idx]['thy-0']
+        dtheory1 = data[0][idx]['dthy-0']
+        theory2  = data[1][idx]['thy-0']
+        dtheory2 = data[1][idx]['dthy-0']
+        rat = np.array(dtheory2)/np.array(dtheory1)
+        hand = ax11.scatter(X,rat,color='firebrick',s=20)
+                
+    ax11.axhline(1,0,1,alpha=1.0,color='black',ls='--')
+    ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
+    ax11.set_xlim(3e-4,1.0)
+    ax11.set_ylim(0.0,1.15)
+    ax11.semilogx()
+    ax11.set_xlabel(r'\boldmath$x$',size=30)
+    ax11.xaxis.set_label_coords(0.95,0.00)
+    ax11.set_xticks([1e-3,1e-2,1e-1])
+    ax11.text(0.05,0.05,r'\boldmath$\sigma^{\rm{EIC}}/\sigma$',transform=ax11.transAxes,size=40)
+
+    handles = [hand]
+    label1  = r'\boldmath$A_{PV}^{had(%s)}$'%tar
+    labels  = [label1]
+    ax11.legend(handles,labels,loc='lower right', fontsize = 25, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+
+    py.tight_layout()
+    py.subplots_adjust(hspace=0)
+    checkdir('%s/gallery'%wdir)
+    filename='%s/gallery/pvdis_had_%s-compare.png'%(wdir,tar)
+
+    py.savefig(filename)
+    py.clf()
+    print
+    print 'Saving A_PV hadron comparison %s plot to %s'%(tar,filename)
 
 

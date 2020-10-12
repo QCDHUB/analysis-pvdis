@@ -337,6 +337,8 @@ conf['steps'][22]['datasets']['idis'].append(10032) # proton   | sigma red     |
 conf['steps'][22]['datasets']['idis'].append(10002) # deuteron | F2            | JLab Hall C (E00-106)
 conf['steps'][22]['datasets']['idis'].append(10003) # proton   | F2            | JLab Hall C (E00-106)
 conf['steps'][22]['datasets']['idis'].append(10033) # n/d      | F2n/F2d       | BONUS
+conf['steps'][22]['datasets']['idis'].append(90001)
+conf['steps'][22]['datasets']['idis'].append(90002)
 conf['steps'][22]['datasets']['dy']=[]
 conf['steps'][22]['datasets']['dy'].append(10001)
 conf['steps'][22]['datasets']['dy'].append(10002)

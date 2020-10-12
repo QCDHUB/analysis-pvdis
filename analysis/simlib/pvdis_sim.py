@@ -260,7 +260,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
     parman.order = jar['order']
     replicas = jar['replicas']
  
-    stat = 0 
+    N = 0 
     for i in range(len(replicas)):
         lprint('Generating stastical errors: %s/%s'%(i+1,len(replicas)))
         par = replicas[i]
@@ -291,18 +291,15 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
         NR = lum*sigR*yjac*bins
         NL = lum*sigL*yjac*bins
 
-        a = (NR-NL)/(NR+NL)
-
-        #--% uncertainty (not divided by sigma) 
-        stat2 = (1 + a**2)/(NR + NL)/(a**2)
-
-        stat += np.sqrt(stat2)/len(replicas)
+        N += (NR+NL)/len(replicas)
 
     #--theory asymmetry
     A = np.array(value)
+    stat2 = np.abs((1 + A**2)/N)
+    stat = np.sqrt(stat2)
 
     #--statistical uncertainty
-    data['stat_u'] = stat*A
+    data['stat_u'] = stat
 
     #--normalization uncertainty
     pol   = 0.01   #polarization
@@ -396,7 +393,7 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
     parman.order = jar['order']
     replicas = jar['replicas']
  
-    stat = 0 
+    N = 0 
     for i in range(len(replicas)):
         lprint('Generating stastical errors: %s/%s'%(i+1,len(replicas)))
         par = replicas[i]
@@ -430,19 +427,16 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
 
         NR = lum*sigR*yjac*bins
         NL = lum*sigL*yjac*bins
-
-        a = (NR-NL)/(NR+NL)
-
-        #--% uncertainty
-        stat2 = np.abs((1 + a**2)/(NR + NL)/(a**2))
-        
-        stat += np.sqrt(stat2)/len(replicas)
+      
+        N += (NR+NL)/len(replicas)
 
     #--theory asymmetry
     A = np.array(value)
+    stat2 = np.abs((1 + A**2)/N)
+    stat = np.sqrt(stat2)
 
     #--statistical uncertainties
-    data['stat_u'] = stat*A
+    data['stat_u'] = stat
 
     #--normalization uncertainty
     pol   = 0.02   #polarization
