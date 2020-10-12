@@ -339,8 +339,6 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
   best_cluster=cluster_order[0]
 
   X=data['X']
-  X1 = data['X'][:100]
-  X2 = data['X'][100:]
 
   denom = {}
   for flav in data['XF']:
@@ -375,10 +373,10 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
       for flav in ['up','dp','sp','g']:
           std = np.std(data['XF'][flav],axis=0)
 
-          if   flav=='up': color,label = 'red'        ,r'$\Delta u^+$' 
-          elif flav=='dp': color,label = 'blue'       ,r'$\Delta d^+$' 
-          elif flav=='sp': color,label = 'green'      ,r'$\Delta s^+$' 
-          elif flav=='g':  color,label = 'orange'     ,r'$\Delta g$' 
+          if   flav=='up': color,label = 'red'        ,r'\boldmath$\Delta u^+$' 
+          elif flav=='dp': color,label = 'blue'       ,r'\boldmath$\Delta d^+$' 
+          elif flav=='sp': color,label = 'green'      ,r'\boldmath$\Delta s^+$' 
+          elif flav=='g':  color,label = 'orange'     ,r'\boldmath$\Delta g$' 
           else: continue
 
           #--plot std over denom
@@ -390,16 +388,18 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
           
         ax.tick_params(axis='both', which='major', top=True, right=True, direction='in',labelsize=25,length=5  ,width=1.5)
         ax.tick_params(axis='both', which='minor', top=True, right=True, direction='in',labelsize=25,length=2.5,width=1.5)
-        ax.set_xlabel(r'\boldmath$x$'    ,size=30)
-        ax.set_ylabel(r'$\sigma^{\rm{EIC}}/\sigma$',size=30)
-        ax.set_ylim(0,1.0) ,ax.set_yticks([0.2,0.4,0.6,0.8,1.0])
+        ax.set_ylim(0,1.2) ,ax.set_yticks([0.2,0.4,0.6,0.8,1.0])
+
+  ax11.axhline(1.0,alpha=0.5,ls='--',color='black')
+  ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
+  ax11.text(0.55,0.25,r'\boldmath$\sigma^{\rm{EIC}}/\sigma$',transform=ax11.transAxes,size=40)
 
   if Q2 == 1.27**2: ax11.text(0.55,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
   else:             ax11.text(0.55,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
 
   ax11.xaxis.set_label_coords(1.0,0.0)
 
-  ax11.legend(loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0 ,ncol=2, columnspacing = 1.0)
+  ax11.legend(loc='lower left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0 ,ncol=2, columnspacing = 1.0)
   py.tight_layout()
 
   filename+='.png'
@@ -415,7 +415,6 @@ def plot_xf(PLOT,kc,kind=0,mode=0,name='',PSETS=[],cmap=False):
         plot_xf_strange(PLOT,kc,mode,name)
     if kind == 1:
         plot_xf_std_ratio(PLOT,kc,name)
-        
 
 moments = []
 moments.append('Sigma')
@@ -552,7 +551,7 @@ def plot_moments(PLOT,kc,mode=0,name=''):
         ax.set_xlim(1e-4,1)
         ax.semilogx()
           
-        ax.tick_params(axis='both', which='both', top=True, right=True, labelbottom=False, direction='in',labelsize=20)
+        ax.tick_params(axis='both', which='both', top=True, right=True, labelbottom=False, direction='in',labelsize=25)
         ax.set_xticks([1e-4,1e-3,1e-2,1e-1])
         #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
 
@@ -568,11 +567,13 @@ def plot_moments(PLOT,kc,mode=0,name=''):
   handles.append(thy_band[(1,'G')])
 
   labels = []
-  labels.append(r'$\Delta \Sigma$')
-  labels.append(r'$\Delta G$')
-  labels.append(r'$\Delta \Sigma~\rm{(EIC~A_{PV}^p)}$')
-  labels.append(r'$\Delta G~\rm{(EIC~A_{PV}^p)}$')
-  ax11.legend(handles,labels,loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
+  labels.append(r'\boldmath$\Delta \Sigma$')
+  labels.append(r'\boldmath$\Delta G$')
+  #labels.append(r'\boldmath$\Delta \Sigma~\rm{(EIC~A_{PV}^p)}$')
+  #labels.append(r'\boldmath$\Delta G~\rm{(EIC~A_{PV}^p)}$')
+  labels.append(r'\boldmath$\Delta \Sigma~\rm{(EIC)}$')
+  labels.append(r'\boldmath$\Delta G~\rm{(EIC)}$')
+  ax11.legend(handles,labels,loc='lower left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
 
 
   #--plot ratio of EIC/no EIC standard deviations
@@ -625,7 +626,7 @@ def plot_moments(PLOT,kc,mode=0,name=''):
         ax.set_xlim(1e-4,1)
         ax.semilogx()
           
-        ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=20)
+        ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=25)
         ax.set_xticks([1e-4,1e-3,1e-2,1e-1])
         #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
  
@@ -633,20 +634,20 @@ def plot_moments(PLOT,kc,mode=0,name=''):
   ax21.xaxis.set_label_coords(0.95,0.0)
 
   ax21.set_ylim(0,1.0)
-  ax21.set_yticks([0,0.2,0.4,0.6,0.8])
-  ax21.set_yticklabels([r'$0$',r'$0.2$',r'$0.4$',r'$0.6$',r'$0.8$'])
+  ax21.set_yticks([0.2,0.4,0.6,0.8])
+  #ax21.set_yticklabels([r'$0.2$',r'$0.4$',r'$0.6$',r'$0.8$'])
 
-  ax21.text(0.55,0.05,r'$\sigma^{EIC}/\sigma$', transform=ax21.transAxes,size=30)
+  ax21.text(0.55,0.15,r'\boldmath$\sigma^{\rm{EIC}}/\sigma$', transform=ax21.transAxes,size=40)
 
   handles = []
   handles.append(hand['Sigma'])
   handles.append(hand['G'])
 
   labels = []
-  labels.append(r'$\Delta \Sigma$')
-  labels.append(r'$\Delta G$')
+  labels.append(r'\boldmath$\Delta \Sigma$')
+  labels.append(r'\boldmath$\Delta G$')
 
-  ax21.legend(handles,labels,loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
+  ax21.legend(handles,labels,loc='lower left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
 
   py.tight_layout()
   py.subplots_adjust(hspace=0)

@@ -222,6 +222,16 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
 
     GF = conf['aux'].GF
 
+    #--kinematic variables
+    rho2 =  1 + 4*X**2*M2/Q2
+    y= (Q2/2/X)/((S)/2)
+    YP = y**2*(rho2+1)/2 - 2*y +2
+    YM = 1-(1-y)**2
+    sin2w = np.array([conf['eweak'].get_sin2w(q2) for q2 in Q2])
+    alpha = np.array([conf['eweak'].get_alpha(q2) for q2 in Q2])
+    gA = -0.5
+    gV = -0.5 + 2*sin2w
+
     #--get structure functions
     resman=RESMAN(parallel=False,datasets=False)
     parman = resman.parman
@@ -249,65 +259,44 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
     jar   = load('%s/data/jar-%d.dat'%(wdir,istep))
     parman.order = jar['order']
     replicas = jar['replicas']
-  
-    F2g, FLg, F2gZ, FLgZ, F3gZ = 0,0,0,0,0
+ 
+    stat = 0 
     for i in range(len(replicas)):
         lprint('Generating stastical errors: %s/%s'%(i+1,len(replicas)))
         par = replicas[i]
         parman.set_new_params(par,initial=True)
         idis._update()
-        F2g  += idis.get_stf(X,Q2,stf='F2g',tar=tar)
-        FLg  += idis.get_stf(X,Q2,stf='FLg',tar=tar)
-        F2gZ += idis.get_stf(X,Q2,stf='F2gZ',tar=tar)
-        FLgZ += idis.get_stf(X,Q2,stf='FLgZ',tar=tar)
-        F3gZ += idis.get_stf(X,Q2,stf='F3gZ',tar=tar)
+        F2g  = idis.get_stf(X,Q2,stf='F2g',tar=tar)
+        FLg  = idis.get_stf(X,Q2,stf='FLg',tar=tar)
+        F2gZ = idis.get_stf(X,Q2,stf='F2gZ',tar=tar)
+        FLgZ = idis.get_stf(X,Q2,stf='FLgZ',tar=tar)
+        F3gZ = idis.get_stf(X,Q2,stf='F3gZ',tar=tar)
  
-    print
- 
-    F2g  /= len(replicas) 
-    FLg  /= len(replicas)
-    F2gZ /= len(replicas)
-    FLgZ /= len(replicas)
-    F3gZ /= len(replicas)
-
-    rho2 =  1 + 4*X**2*M2/Q2
-
-    y= (Q2/2/X)/((S)/2)
-
-    YP = y**2*(rho2+1)/2 - 2*y +2
-    YM = 1-(1-y)**2
-
-    sin2w = np.array([conf['eweak'].get_sin2w(q2) for q2 in Q2])
-    alpha = np.array([conf['eweak'].get_alpha(q2) for q2 in Q2])
-
-    gA = -0.5
-    gV = -0.5 + 2*sin2w
-
-    C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
+        C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
   
-    C1 = np.pi*alpha**2/(X*y*Q2)
+        C1 = np.pi*alpha**2/(X*y*Q2)
 
-    T1g  = YP*F2g  - y**2*FLg
-    T1gZ = YP*F2gZ - y**2*FLgZ
+        T1g  = YP*F2g  - y**2*FLg
+        T1gZ = YP*F2gZ - y**2*FLgZ
 
-    T2 = X*YM*F3gZ
+        T2 = X*YM*F3gZ
 
-    sigR = C1*(T1g + C*(gV-gA)*(T1gZ - T2))
-    sigL = C1*(T1g + C*(gV+gA)*(T1gZ + T2))
+        sigR = C1*(T1g + C*(gV-gA)*(T1gZ - T2))
+        sigL = C1*(T1g + C*(gV+gA)*(T1gZ + T2))
 
-    ##--Jacobian d/dy -> d/dQ2
-    yjac = 1/(X*S)
+        ##--Jacobian d/dy -> d/dQ2
+        yjac = 1/(X*S)
 
-    #--assuming same luminosity
-    NR = lum*sigR*yjac*bins
-    NL = lum*sigL*yjac*bins
+        #--assuming same luminosity
+        NR = lum*sigR*yjac*bins
+        NL = lum*sigL*yjac*bins
 
-    a = (NR-NL)/(NR+NL)
+        a = (NR-NL)/(NR+NL)
 
-    #--% uncertainty (not divided by sigma) 
-    stat2 = (1 + a**2)/(NR + NL)/(a**2)
+        #--% uncertainty (not divided by sigma) 
+        stat2 = (1 + a**2)/(NR + NL)/(a**2)
 
-    stat = np.sqrt(stat2)
+        stat += np.sqrt(stat2)/len(replicas)
 
     #--theory asymmetry
     A = np.array(value)
@@ -374,6 +363,16 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
 
     GF = conf['aux'].GF
 
+    #--kinematic variables
+    rho2 = 1 + 4*X**2*M2/Q2
+    y = (Q2/2/X)/((S)/2)
+    YP = y**2 - 2*y +2
+    YM = 1-(1-y)**2
+    sin2w = np.array([conf['eweak'].get_sin2w(q2) for q2 in Q2])
+    alpha = np.array([conf['eweak'].get_alpha(q2) for q2 in Q2])
+    gA = -0.5
+    gV = -0.5 + 2*sin2w
+
     #--get structure functions
     resman=RESMAN(parallel=False,datasets=False)
     parman = resman.parman
@@ -396,71 +395,48 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
     jar   = load('%s/data/jar-%d.dat'%(wdir,istep))
     parman.order = jar['order']
     replicas = jar['replicas']
-  
-    g1gZ, g5gZ, F2g, FLg, F2gZ, FLgZ, F3gZ = 0,0,0,0,0,0,0
+ 
+    stat = 0 
     for i in range(len(replicas)):
         lprint('Generating stastical errors: %s/%s'%(i+1,len(replicas)))
         par = replicas[i]
         parman.set_new_params(par,initial=True)
         idis._update()
         pidis._update()
-        g1gZ += pidis.get_stf(X,Q2,stf='g1gZ',tar=tar) 
-        g5gZ += pidis.get_stf(X,Q2,stf='g5gZ',tar=tar) 
-        F2g  += idis .get_stf(X,Q2,stf='F2g'  ,tar=tar) 
-        FLg  += idis .get_stf(X,Q2,stf='FLg'  ,tar=tar) 
-        F2gZ += idis .get_stf(X,Q2,stf='F2gZ' ,tar=tar) 
-        FLgZ += idis .get_stf(X,Q2,stf='FLgZ' ,tar=tar) 
-        F3gZ += idis .get_stf(X,Q2,stf='F3gZ' ,tar=tar) 
- 
-    print
- 
-    g1gZ /= len(replicas) 
-    g5gZ /= len(replicas) 
-    F2g  /= len(replicas) 
-    FLg  /= len(replicas) 
-    F2gZ /= len(replicas) 
-    FLgZ /= len(replicas) 
-    F3gZ /= len(replicas) 
- 
-    rho2 = 1 + 4*X**2*M2/Q2
+        g1gZ = pidis.get_stf(X,Q2,stf='g1gZ',tar=tar) 
+        g5gZ = pidis.get_stf(X,Q2,stf='g5gZ',tar=tar) 
+        F2g  = idis .get_stf(X,Q2,stf='F2g'  ,tar=tar) 
+        FLg  = idis .get_stf(X,Q2,stf='FLg'  ,tar=tar) 
+        F2gZ = idis .get_stf(X,Q2,stf='F2gZ' ,tar=tar) 
+        FLgZ = idis .get_stf(X,Q2,stf='FLgZ' ,tar=tar) 
+        F3gZ = idis .get_stf(X,Q2,stf='F3gZ' ,tar=tar) 
 
-    y = (Q2/2/X)/((S)/2)
-
-    YP = y**2 - 2*y +2
-    YM = 1-(1-y)**2
-
-    sin2w = np.array([conf['eweak'].get_sin2w(q2) for q2 in Q2])
-    alpha = np.array([conf['eweak'].get_alpha(q2) for q2 in Q2])
-
-    gA = -0.5
-    gV = -0.5 + 2*sin2w
-
-    C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
+        C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
   
-    C1 = np.pi*alpha**2/(X*y*Q2)
+        C1 = np.pi*alpha**2/(X*y*Q2)
 
-    T1g  = YP*F2g  - y**2*FLg
-    T1gZ = YP*F2gZ - y**2*FLgZ
+        T1g  = YP*F2g  - y**2*FLg
+        T1gZ = YP*F2gZ - y**2*FLgZ
 
-    T2 = X*YM*F3gZ
+        T2 = X*YM*F3gZ
 
-    T3 = YP*gV*g5gZ + YM*gA*g1gZ
+        T3 = YP*gV*g5gZ + YM*gA*g1gZ
 
-    sigR = C1*(T1g + C*(gV*T1gZ + gA*T2) + 2*X*C*T3)
-    sigL = C1*(T1g + C*(gV*T1gZ + gA*T2) - 2*X*C*T3)
+        sigR = C1*(T1g + C*(gV*T1gZ + gA*T2) + 2*X*C*T3)
+        sigL = C1*(T1g + C*(gV*T1gZ + gA*T2) - 2*X*C*T3)
 
-    ##--Jacobian d/dy -> d/dQ2
-    yjac = 1/(X*S)
+        ##--Jacobian d/dy -> d/dQ2
+        yjac = 1/(X*S)
 
-    NR = lum*sigR*yjac*bins
-    NL = lum*sigL*yjac*bins
+        NR = lum*sigR*yjac*bins
+        NL = lum*sigL*yjac*bins
 
-    a = (NR-NL)/(NR+NL)
+        a = (NR-NL)/(NR+NL)
 
-    #--% uncertainty
-    stat2 = np.abs((1 + a**2)/(NR + NL)/(a**2))
-
-    stat = np.sqrt(stat2)
+        #--% uncertainty
+        stat2 = np.abs((1 + a**2)/(NR + NL)/(a**2))
+        
+        stat += np.sqrt(stat2)/len(replicas)
 
     #--theory asymmetry
     A = np.array(value)
@@ -504,7 +480,7 @@ def convert_lum(lum):
 def plot_errors(wdir,kind,tar,est,obs,lum):
 
     nrows,ncols=1,1
-    fig = py.figure(figsize=(ncols*9,nrows*5))
+    fig = py.figure(figsize=(ncols*9.1,nrows*5.2))
     ax11=py.subplot(nrows,ncols,1)
 
     tab   = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs))
@@ -529,32 +505,23 @@ def plot_errors(wdir,kind,tar,est,obs,lum):
     ax11.set_xlim(2e-5,1)
     ax11.semilogx()
     ax11.semilogy()
+    ax11.set_xticks([1e-4,1e-3,1e-2,1e-1])
 
     if kind == 'e':
-        #ax11.set_ylim(1e-4,1e-1)
-        ax11.set_ylabel(r'\boldmath$|\sigma_{A_{PV}^e}/A_{PV}^e|$',size=30)
-        #if est == 'opt': ax11.text(0.6,0.4,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
-        #if est == 'mod': ax11.text(0.6,0.4,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
-        #if est == 'pes': ax11.text(0.6,0.4,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
+        ax11.set_ylim(8e-3,4e-1)
+        ax11.text(0.02,0.20,r'\boldmath$|\sigma_{A_{PV}^{e(%s)}}/A_{PV}^{e(%s)}|$'%(tar,tar),transform=ax11.transAxes,size=40)
     if kind == 'had':
-        #ax11.set_ylim(1e-3,1e3)
-        ax11.set_yticks([1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3])
+        ax11.set_ylim(8e-3,3e4)
+        ax11.set_yticks([1e-2,1e-1,1e0,1e1,1e2,1e3,1e4])
         locmin = matplotlib.ticker.LogLocator(base=10.0,subs=(0.2,0.4,0.6,0.8),numticks=7)
         ax11.yaxis.set_minor_locator(locmin)
         ax11.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-        ax11.set_ylabel(r'\boldmath$|\sigma_{A_{PV}^{p}}/A_{PV}^{p}|$',size=30)
-        #if est == 'opt': ax11.text(0.6,0.6,r'\textrm{Optimistic}' ,transform = ax11.transAxes,size=30)
-        #if est == 'mod': ax11.text(0.6,0.6,r'\textrm{Moderate}'   ,transform = ax11.transAxes,size=30)
-        #if est == 'pes': ax11.text(0.6,0.6,r'\textrm{Pessimistic}',transform = ax11.transAxes,size=30)
+        ax11.text(0.02,0.20,r'\boldmath$|\sigma_{A_{PV}^{had(%s)}}/A_{PV}^{had(%s)}|$'%(tar,tar),transform=ax11.transAxes,size=40)
 
-
-    ax11.set_xlabel(r'\boldmath$x$',size=30)
+    ax11.set_xlabel(r'\boldmath$x$',size=30*1.3)
+    ax11.xaxis.set_label_coords(0.95,0.00)
 
     ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=30)
-
-
-    if tar == 'p':   ax11.text(0.05,0.85,r'\textrm{Proton}'     ,transform = ax11.transAxes,size=30)
-    if tar == 'd':   ax11.text(0.05,0.85,r'\textrm{Deuteron}'   ,transform = ax11.transAxes,size=30)
 
     handles = [hand['alpha'],hand['stat'],hand['syst']]
     label1 = r'\textbf{\textrm{Total}}'
@@ -562,7 +529,7 @@ def plot_errors(wdir,kind,tar,est,obs,lum):
     label3 = r'\textbf{\textrm{Syst}}'
     labels = [label1,label2,label3]
 
-    ax11.legend(handles,labels,loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+    ax11.legend(handles,labels,loc='upper left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
     py.tight_layout()
     checkdir('%s/gallery'%wdir)
     filename = '%s/gallery/pvdis-errors-%s-%s-%s-%s'%(wdir,kind,tar,est,obs)

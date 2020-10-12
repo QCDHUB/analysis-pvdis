@@ -49,8 +49,8 @@ def plot_pvdis_e(wdir,kc,tar):
     conf['datasets']['idis']={}
     conf['datasets']['idis']['xlsx']={}
 
-    if tar == 'p': conf['datasets']['idis']['xlsx'][90001]='pidis/expdata/90001.xlsx'
-    if tar == 'd': conf['datasets']['idis']['xlsx'][90002]='pidis/expdata/90002.xlsx'
+    if tar == 'p': conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90001.xlsx'
+    if tar == 'd': conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90002.xlsx'
 
     conf['datasets']['idis']['norm']={}
     conf['datasets']['idis']['filters']=[]
@@ -85,7 +85,7 @@ def plot_pvdis_e(wdir,kc,tar):
     hand = {}
     #--plot data
     for idx in tables:
-        RS = np.sort(np.unique(conf['pidis tabs'][idx]['RS']))
+        RS = np.sort(np.unique(conf['idis tabs'][idx]['RS']))
         for rs in RS:
             nrows,ncols=3,5
             fig = py.figure(figsize=(ncols*7,nrows*6))
@@ -170,21 +170,21 @@ def plot_pvdis_e(wdir,kc,tar):
                 ax.set_ylabel(r'\boldmath$A_{PV}^{e\rm{(%s)}}$'%tar,size=30)
 
             #ax11.text(0.05,0.05,r'$\textrm{Proton}$',transform=ax11.transAxes,size=30)
-            ax11.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[0],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax11.transAxes,size=25)
-            ax12.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[1],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax12.transAxes,size=25)
-            ax13.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[2],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax13.transAxes,size=25)
-            ax14.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[3],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax14.transAxes,size=25)
-            ax15.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[4],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax15.transAxes,size=25)
-            ax21.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[5],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax21.transAxes,size=25)
-            ax22.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[6],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax22.transAxes,size=25)
-            ax23.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[7],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax23.transAxes,size=25)
-            ax24.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[8],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax24.transAxes,size=25)
-            ax25.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[9],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax25.transAxes,size=25)
-            ax31.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[10],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax31.transAxes,size=25)
-            ax32.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[11],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax32.transAxes,size=25)
-            ax33.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[12],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax33.transAxes,size=25)
-            ax34.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[13],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax34.transAxes,size=25)
-            ax35.text(0.05,0.05,r'$Q^2=%s$'%np.round(Q2[14],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax35.transAxes,size=25)
+            ax11.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[0],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax11.transAxes,size=25)
+            ax12.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[1],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax12.transAxes,size=25)
+            ax13.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[2],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax13.transAxes,size=25)
+            ax14.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[3],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax14.transAxes,size=25)
+            ax15.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[4],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax15.transAxes,size=25)
+            ax21.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[5],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax21.transAxes,size=25)
+            ax22.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[6],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax22.transAxes,size=25)
+            ax23.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[7],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax23.transAxes,size=25)
+            ax24.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[8],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax24.transAxes,size=25)
+            ax25.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[9],1) + ' ' + r'\textrm{GeV}' + r'$^2$' ,transform=ax25.transAxes,size=25)
+            ax31.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[10],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax31.transAxes,size=25)
+            ax32.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[11],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax32.transAxes,size=25)
+            ax33.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[12],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax33.transAxes,size=25)
+            ax34.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[13],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax34.transAxes,size=25)
+            ax35.text(0.05,0.07,r'$Q^2=%s$'%np.round(Q2[14],1) + ' ' + r'\textrm{GeV}' + r'$^2$',transform=ax35.transAxes,size=25)
             #ax11.text(0.80,0.07,r'$Q^2=%s$'%np.round(Q2[8],1)                                  ,transform=ax11.transAxes,size=14)
 
 
