@@ -31,7 +31,7 @@ from qcdlib.aux import AUX
 from qcdlib.alphaS import ALPHAS
 from qcdlib.eweak import EWEAK
 
-def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',lum='100:fb-1',force=True):
+def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',force=True):
 
     #--generate initial data file
     gen_pvdis_xlsx(wdir,kind,tar,est,obs)
@@ -45,10 +45,10 @@ def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',lum='100:fb-1',force=True):
     predict.get_predictions(wdir,force=force,mod_conf=conf,name=name)
 
     #--update tables
-    update_tabs(wdir,kind,tar,est,obs,lum)
+    update_tabs(wdir,kind,tar,est,obs)
 
     #--plot errors
-    plot_errors(wdir,kind,tar,est,obs,lum)
+    plot_errors(wdir,kind,tar,est,obs)
 
     #--generate lhapdf info and data files
     if obs=='mean':
@@ -65,7 +65,10 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs):
 
     #--get specific points from data file at fitpack/database/pvdis/expdata/1000.xlsx
     fdir = os.environ['FITPACK']
-    grid = pd.read_excel(fdir + '/database/EIC/expdata/3000.xlsx')
+    if tar == 'p': idx = 1000
+    if tar == 'd': idx = 1001
+    if tar == 'h': idx = 1001
+    grid = pd.read_excel(fdir + '/database/EIC/expdata/%s.xlsx'%idx)
     grid = grid.to_dict(orient='list')
     data['X']    = grid['X']
     data['Q2']   = grid['Q2']
@@ -74,6 +77,7 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs):
     data['Q2up'] = grid['Q2up']
     data['Q2do'] = grid['Q2do']
     data['RS']   = grid['RS']
+    data['lum']  = grid['lum']
 
     obs = 'A_PV_%s'%kind
 
@@ -126,7 +130,7 @@ def gen_conf(wdir,kind,tar,est,obs):
 
     return conf
 
-def update_tabs(wdir,kind,tar,est,obs,lum):
+def update_tabs(wdir,kind,tar,est,obs):
 
     istep=core.get_istep()
     data=load('%s/data/predictions-%d-pvdis-%s-%s-%s.dat'%(wdir,istep,kind,tar,est))
@@ -167,33 +171,17 @@ def update_tabs(wdir,kind,tar,est,obs,lum):
     for i in range(len(tab['prediction-rep'])):
         tab['value%s'%(i+1)] = tab['prediction-rep'][i]
 
-    #--test distribution
-    nrows,ncols=1,1
-    fig = py.figure(figsize=(ncols*8,nrows*5))
-    ax11=py.subplot(nrows,ncols,1)
-
-    idx = np.array([i for i in range(len(tab['prediction-rep']))])
-    points = sorted(np.array(tab['prediction-rep']).T[0])
-    ax11.scatter(idx,points)
-    ax11.set_ylim(-5e-7,5e-7)
-    ax11.axhline(np.mean(tab['prediction-rep'],axis=0)[0],0,1)
-    ax11.axhline(np.mean(tab['prediction-rep'],axis=0)[0]-np.std(tab['prediction-rep'],axis=0)[0],0,1,color='black')
-    ax11.axhline(np.mean(tab['prediction-rep'],axis=0)[0]+np.std(tab['prediction-rep'],axis=0)[0],0,1,color='black')
-
-    #py.savefig('test.png')
-    py.clf()
-
     del tab['prediction-rep']
 
-    if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,obs,tab['value'],lum)
-    if kind == 'had': tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_had_errors(wdir,kind,tar,est,obs,tab['value'],lum)
+    if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,obs,tab['value'])
+    if kind == 'had': tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_had_errors(wdir,kind,tar,est,obs,tab['value'])
 
     df=pd.DataFrame(tab)
     filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs)
     df.to_excel(filename, index=False)
     print('Updating xlsx file and saving to %s'%filename)
 
-def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
+def A_PV_e_errors(wdir,kind,tar,est,obs,value):
 
     conf['aux'] = AUX()
     conf['eweak'] = EWEAK()
@@ -218,6 +206,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
     #if tar=='d': M2 = 4*M2
 
     #--luminosity
+    lum = str(data['lum'][0])+':fb-1'
     lum = convert_lum(lum)
 
     GF = conf['aux'].GF
@@ -330,7 +319,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value,lum):
 
     return data['stat_u'],data['syst_u'],data['norm_c']
 
-def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
+def A_PV_had_errors(wdir,kind,tar,est,obs,value):
 
     conf['aux'] = AUX()
     conf['eweak'] = EWEAK()
@@ -353,9 +342,8 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value,lum):
 
     M2 = conf['aux'].M2
 
-    #if tar=='d': M2 = 4*M2
-
     #--luminosity
+    lum = str(data['lum'][0])+':fb-1'
     lum = convert_lum(lum)
 
     GF = conf['aux'].GF
@@ -471,7 +459,7 @@ def convert_lum(lum):
     if units=='fb-1':   return lum*one*1e12
     else:               sys.exit('units not convertible!')
 
-def plot_errors(wdir,kind,tar,est,obs,lum):
+def plot_errors(wdir,kind,tar,est,obs):
 
     nrows,ncols=1,1
     fig = py.figure(figsize=(ncols*9.1,nrows*5.2))
