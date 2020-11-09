@@ -55,8 +55,8 @@ conf['datasets']['idis']['xlsx'][10006]='idis/expdata/10006.xlsx' # deuteron | F
 conf['datasets']['idis']['xlsx'][10002]='idis/expdata/10002.xlsx' # deuteron | F2            | JLab Hall C (E00-106)
 conf['datasets']['idis']['xlsx'][10033]='idis/expdata/10033.xlsx' # n/d      | F2n/F2d       | BONUS
 #------------------------------------------------------------------------------------------------------------------
-conf['datasets']['idis']['xlsx'][90001]='idis/expdata/90001.xlsx' # proton   | A_PV | mean
-conf['datasets']['idis']['xlsx'][90002]='idis/expdata/90002.xlsx' # deuteron | A_PV | mean
+conf['datasets']['idis']['xlsx'][90001]='EIC/expdata/90001.xlsx' # proton   | A_PV | mean
+conf['datasets']['idis']['xlsx'][90002]='EIC/expdata/90002.xlsx' # deuteron | A_PV | mean
 #------------------------------------------------------------------------------------------------------------------
 conf['datasets']['idis']['norm']={}
 conf['datasets']['idis']['norm'][10002]={'value':    1.00000e+00, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
