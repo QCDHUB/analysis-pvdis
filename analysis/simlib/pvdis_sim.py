@@ -31,10 +31,10 @@ from qcdlib.aux import AUX
 from qcdlib.alphaS import ALPHAS
 from qcdlib.eweak import EWEAK
 
-def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',force=True):
+def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',lum=None,force=True):
 
     #--generate initial data file
-    gen_pvdis_xlsx(wdir,kind,tar,est,obs)
+    gen_pvdis_xlsx(wdir,kind,tar,est,obs,lum)
 
     #--modify conf with new data file
     conf = gen_conf(wdir,kind,tar,est,obs)
@@ -56,12 +56,12 @@ def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',force=True):
         gen_lhapdf_dat_file (wdir,kind,tar,est,obs)
 
 #--generate pseudo-data
-def gen_pvdis_xlsx(wdir,kind,tar,est,_obs):
+def gen_pvdis_xlsx(wdir,kind,tar,est,_obs,lum):
 
     checkdir('%s/sim'%wdir)
 
     #-- the kinem. var.
-    data={_:[] for _ in ['col','target','X','Xdo','Xup','Q2','Q2do','Q2up','obs','value','stat_u','syst_u','norm_c','RS']}
+    data={_:[] for _ in ['col','target','X','Xdo','Xup','Q2','Q2do','Q2up','obs','value','stat_u','syst_u','norm_c','RS','lum']}
 
     #--get specific points from data file at fitpack/database/pvdis/expdata/1000.xlsx
     fdir = os.environ['FITPACK']
@@ -77,7 +77,7 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs):
     data['Q2up'] = grid['Q2up']
     data['Q2do'] = grid['Q2do']
     data['RS']   = grid['RS']
-    data['lum']  = grid['lum']
+    if lum==None: data['lum']  = grid['lum']
 
     obs = 'A_PV_%s'%kind
 
@@ -89,6 +89,7 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs):
         data['stat_u'].append(1e-10)
         data['syst_u'].append(0.0)
         data['norm_c'].append(0.0)
+        if lum!=None: data['lum'].append(lum)
 
     df=pd.DataFrame(data)
     filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,_obs)
@@ -344,6 +345,7 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
 
     #--luminosity
     lum = data['lum'][0]
+    print lum
     lum = convert_lum(lum)
 
     GF = conf['aux'].GF

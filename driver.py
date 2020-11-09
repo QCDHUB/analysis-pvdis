@@ -88,15 +88,23 @@ force = False
 #########################
 ##--Simulation for PVDIS
 #########################
-kind  = 'had'    #--'e' for polarized electron, 'had' for polarized hadron
-tar   = 'p'      #--choose target: 'p', 'd', or 'h'
-est   = 'opt'    #--choose systematic errors (only 'opt' available)
-obs   = 'mean'   #--choose to use mean of replicas (currently no other options)
-force = False    #--if True, regenerate predictions
+#--'e' for polarized electron, 'had' for polarized hadron
+kind  = 'had'
+#--choose target: 'p', 'd', or 'h'
+tar   = 'p'
+#--choose systematic errors (only 'opt' available)
+est   = 'opt'
+#--choose to use mean of replicas (currently no other options)
+obs   = 'mean'
+#--if True, force predictions to be regenerated
+force = False
+#--if None, default to 100fb-1 for proton, 10fb-1 for deuteron and helium.
+#--can choose instead, for example, lum = '500:fb-1'
+lum   = None
 
 FILT = []
 #inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
-pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,force=force)
+pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,lum=lum,force=force)
 
 #pvdis.plot_errors(wdir)
 
