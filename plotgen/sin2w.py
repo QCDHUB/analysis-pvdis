@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 import os,sys
 import kmeanconf as kc
-
 #--from corelib
 from analysis.corelib import core, inspect, predict, classifier, optpriors, jar, mlsamples, summary
-
-#--from qpdlib
-from analysis.qpdlib import ppdf
+#--from obslib
+from analysis.obslib  import sin2w
 
 #--primary working directory
 wdir=sys.argv[1]
@@ -27,24 +25,20 @@ Q21    = 10
 Q22    = 10
 Q23    = 10
 
-color1 = 'red'
+color1 = 'yellow'
 color2 = 'red'
 color3 = 'green'
 
-label1 = None 
-label2 = None 
-label3 = None
- 
-label1 = r'\textbf{\textrm{Optimistic}}'
-label2 = r'\textbf{\textrm{Moderate}}'
-label3 = r'\textbf{\textrm{No EIC}}'
+label1 = r'\textbf{\textrm{+EIC d}}'
+label2 = r'\textbf{\textrm{+EIC p}}'
+label3 = r'\textbf{\textrm{+p,d}}'
 
 ls1    = '-'
 ls2    = '-'
 ls3    = '-'
 
-alpha1 = 0.5
-alpha2 = 0.2
+alpha1 = 0.9
+alpha2 = 0.9
 alpha3 = 0.2
 
 PLOT = []
@@ -56,25 +50,13 @@ if wdir3 != None: PLOT.append((wdir3,Q23,color3,ls3,label3,alpha3))
 Q2 = Q21
 
 #--name to append at end of file
+name = ''
 name = '-compare'
-#name = '-LHC-compare'
-
-#--maximum number of replicas to plot
-nrep = None
-#nrep = 50
-
-#--mode: 0 for all replicas, 1 for mean and std
-mode = 0
 
 ########################
-#--Polarized proton pdfs
+##--Plot sin2w
 ########################
-PSETS = []
 
-ppdf.plot_xf(PLOT,kc,kind=1)
-ppdf.plot_moments(PLOT,kc,mode=1)
-
-
-
+sin2w.plot_sin2w(PLOT,kc,mode=1,name=name)
 
 
