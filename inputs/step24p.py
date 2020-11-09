@@ -391,7 +391,7 @@ conf['steps']={}
 #conf['steps'][23]['datasets']['wzrv'].append(2015)
 
 #------------------------------------------------------------------------------------------------------------------
-#--fit EIC data
+#--fit EIC data (proton only)
 conf['tmc']   = 'AOT'
 conf['ht']    = True
 conf['ht type'] = 'mult'
@@ -420,7 +420,6 @@ conf['steps'][24]['datasets']['idis'].append(10002) # deuteron | F2            |
 conf['steps'][24]['datasets']['idis'].append(10003) # proton   | F2            | JLab Hall C (E00-106)
 conf['steps'][24]['datasets']['idis'].append(10033) # n/d      | F2n/F2d       | BONUS
 conf['steps'][24]['datasets']['idis'].append(90001) # proton   | A_PV | mean
-conf['steps'][24]['datasets']['idis'].append(90002) # deuteron | A_PV | mean
 conf['steps'][24]['datasets']['dy']=[]
 conf['steps'][24]['datasets']['dy'].append(10001)
 conf['steps'][24]['datasets']['dy'].append(10002)

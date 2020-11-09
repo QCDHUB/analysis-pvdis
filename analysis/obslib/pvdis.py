@@ -1,5 +1,6 @@
 import sys,os
 import numpy as np
+import pandas as pd
 import copy
 
 #--matplotlib
@@ -557,5 +558,110 @@ def compare_had(PLOT,kc,tar):
     py.clf()
     print
     print 'Saving A_PV hadron comparison %s plot to %s'%(tar,filename)
+
+def plot_errors(wdir):
+
+    nrows,ncols=1,1
+    fig = py.figure(figsize=(ncols*7,nrows*4))
+    ax=py.subplot(nrows,ncols,1)
+
+    hand = {}
+    for tar in ['p','d']:
+        if tar == 'p': idx,color = 90001,'firebrick'
+        if tar == 'd': idx,color = 90002,'darkgreen'
+        tab  = pd.read_excel('%s/database/EIC/expdata/%s.xlsx'%(os.environ['FITPACK'],idx)).to_dict(orient='list')
+        X     = np.array(tab['X'])
+        value = np.array(tab['value'])
+        stat  = np.abs(np.array(tab['stat_u'])/value)*100
+        syst  = np.abs(np.array(tab['syst_u'])/value)*100
+
+        alpha = np.sqrt((stat**2 + syst**2))
+
+        hand['stat %s'%tar]  = ax.scatter(X,stat ,color=color ,s=10)
+        hand['syst']         = ax.scatter(X,syst ,color='darkblue' ,s=10)
+
+    ax.set_xlim(1e-4,1)
+    ax.semilogx()
+    ax.semilogy()
+    ax.set_xticks([1e-4,1e-3,1e-2,1e-1])
+
+    ax.set_ylim(8e-1,2e2)
+    ax.text(0.02,0.87,r'\boldmath$\delta A_{PV}^{e}$'+r'\textrm{\textbf{(\%)}}',transform=ax.transAxes,size=30)
+
+    ax.set_xlabel(r'\boldmath$x$',size=30*1.3)
+    ax.xaxis.set_label_coords(0.95,0.00)
+
+    ax.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=30)
+
+    handles,labels = [], []
+    handles.append(hand['stat p'])
+    handles.append(hand['stat d'])
+    handles.append(hand['syst'])
+    labels.append(r'\textbf{\textrm{Stat (p)}}')
+    labels.append(r'\textbf{\textrm{Stat (d)}}')
+    labels.append(r'\textbf{\textrm{Syst (p,d)}}')
+
+    ax.legend(handles,labels,loc=(-0.02,0.05), fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+
+    py.tight_layout()
+    checkdir('%s/gallery'%wdir)
+    filename = '%s/gallery/pvdis-e-errors.pdf'%wdir
+    py.savefig(filename)
+    print('Saving error plot to %s'%filename)
+    py.clf()
+
+
+    #--hadron
+    nrows,ncols=1,1
+    fig = py.figure(figsize=(ncols*7,nrows*4))
+    ax=py.subplot(nrows,ncols,1)
+
+    for tar in ['p']:
+        if tar == 'p': idx,color = 90011, 'firebrick'
+        tab  = pd.read_excel('%s/database/EIC/expdata/%s.xlsx'%(os.environ['FITPACK'],idx)).to_dict(orient='list')
+        X     = np.array(tab['X'])
+        value = np.array(tab['value'])
+        stat  = np.abs(np.array(tab['stat_u'])/value)*100
+        syst  = np.abs(np.array(tab['syst_u'])/value)*100
+
+        alpha = np.sqrt((stat**2 + syst**2))
+
+        hand = {}
+        hand['stat']  = ax.scatter(X,stat ,color=color      ,s=10)
+        hand['syst']  = ax.scatter(X,syst ,color='darkblue' ,s=10)
+
+    ax.set_xlim(1e-4,1)
+    ax.semilogx()
+    ax.semilogy()
+    ax.set_xticks([1e-4,1e-3,1e-2,1e-1])
+
+    ax.set_ylim(8e-1,2e6)
+    ax.set_yticks([1e0,1e1,1e2,1e3,1e4,1e5,1e6])
+    locmin = matplotlib.ticker.LogLocator(base=10.0,subs=(0.2,0.4,0.6,0.8),numticks=7)
+    ax.yaxis.set_minor_locator(locmin)
+    ax.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    ax.text(0.65,0.85,r'\boldmath$\delta A_{PV}^{%s}$'%(tar)+r'\textrm{\textbf{(\%)}}',transform=ax.transAxes,size=30)
+
+    ax.set_xlabel(r'\boldmath$x$',size=30*1.3)
+    ax.xaxis.set_label_coords(0.95,0.00)
+
+    ax.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=30)
+
+    handles = [hand['stat'],hand['syst']]
+    label1 = r'\textbf{\textrm{Stat}}'
+    label2 = r'\textbf{\textrm{Syst}}'
+    labels = [label1,label2]
+
+    ax.legend(handles,labels,loc=(0.02,0.10), fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+
+    py.tight_layout()
+    checkdir('%s/gallery'%wdir)
+    filename = '%s/gallery/pvdis-had-errors.pdf'%wdir
+    py.savefig(filename)
+    print('Saving error plot to %s'%filename)
+    py.clf()
+
+
+
 
 

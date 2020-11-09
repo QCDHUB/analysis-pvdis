@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import cm
+matplotlib.rcParams['text.latex.preview']=True
 import pylab as py
 import lhapdf
 
@@ -448,17 +449,17 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
           mean = np.mean(data['XF'][flav],axis=0)
           std = np.std(data['XF'][flav],axis=0)
 
-          if flav=='uv':      color = 'red'  
-          elif flav=='dv':    color = 'orange'  
-          elif flav=='db+ub': color = 'yellow' 
-          elif flav=='db-ub': color = 'green' 
-          elif flav=='g':     color = 'blue'  
-          elif flav=='s+sb':  color = 'cyan'
+          if flav=='uv':      color,ls = 'yellow', '--' 
+          elif flav=='dv':    color,ls = 'orange', '--'  
+          elif flav=='db+ub': color,ls = 'blue'  , '-' 
+          elif flav=='db-ub': color,ls = 'green' , '--' 
+          elif flav=='g':     color,ls = 'cyan'  , ':'
+          elif flav=='s+sb':  color,ls = 'red'   , '-'
           else: continue
           ax = ax11
 
           #--plot std over denom
-          hand[flav] ,= ax.plot(X,std/denom[flav],style,color=color,lw=5)
+          hand[flav] ,= ax.plot(X,std/denom[flav],style,color=color,lw=5, ls=ls)
 
   for ax in [ax11]:
         ax.set_xlim(1e-4,0.5)
@@ -473,12 +474,13 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
 
   ax11.set_ylim(0,1.2) ,ax11.set_yticks([0.2,0.4,0.6,0.8,1.0])
 
-  ax11.text(0.05,0.25,r'\boldmath$\sigma^{\rm{EIC}}/\sigma$',transform=ax11.transAxes,size=40)
+  ax11.text(0.02,0.05,r'\boldmath$\delta^{\rm{EIC}}/\delta$',transform=ax11.transAxes,size=40)
+  ax11.text(0.02,0.25,r'\textrm{\textbf{JAM}}'              ,transform=ax11.transAxes,size=40)
   ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
   ax11.xaxis.set_label_coords(0.95,0.00)
 
-  if Q2 == 1.27**2: ax11.text(0.05,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
-  else:             ax11.text(0.05,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+  #if Q2 == 1.27**2: ax11.text(0.05,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
+  #else:             ax11.text(0.05,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
 
   handles = []
   handles.append(hand['uv'])
@@ -496,10 +498,10 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
   labels.append(r'\boldmath$s + \bar{s}$')
   labels.append(r'\boldmath$g$')
 
-  ax11.legend(handles,labels,loc='lower right', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 3, columnspacing = 1.0)
+  ax11.legend(handles,labels,loc='lower right', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 3, columnspacing = 1.0)
   py.tight_layout()
 
-  filename+='.png'
+  filename+='.pdf'
 
   checkdir('%s/gallery'%wdir)
   py.savefig(filename)
@@ -545,8 +547,8 @@ def plot_xf_strange_compare(PLOT,kc,name=''):
           mean = np.mean(data['XF'][flav],axis=0)
           std = np.std(data['XF'][flav],axis=0)
 
-          if j==0: color,alpha='cyan',1.0
-          if j==1: color,alpha='red',1.0
+          if j==0: color,alpha='yellow',0.9
+          if j==1: color,alpha='red'   ,0.9
 
           if flav=='s+sb': ax = ax11
           else: continue
@@ -570,7 +572,7 @@ def plot_xf_strange_compare(PLOT,kc,name=''):
 
   ax11.set_ylim(0,1.6)    ,ax11.set_yticks([0.5,1.0,1.5])
 
-  ax11.text(0.2,0.8,r'\boldmath{$x(s+\bar{s})$}', transform=ax11.transAxes,size=25)
+  ax11.text(0.2,0.8,r'\boldmath{$x(s+\bar{s})$}', transform=ax11.transAxes,size=40)
 
   if Q2 == 1.27**2: ax11.text(0.05,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
   else:             ax11.text(0.05,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
@@ -580,13 +582,13 @@ def plot_xf_strange_compare(PLOT,kc,name=''):
   handles.append(hand[1])
 
   labels = []
-  labels.append(r'\textrm{\textbf{No EIC}}')
-  labels.append(r'\textrm{\textbf{EIC}}')
+  labels.append(r'\textrm{\textbf{JAM}}')
+  labels.append(r'\textrm{\textbf{+EIC}}')
 
-  ax11.legend(handles,labels,loc='upper right', fontsize = 30, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+  ax11.legend(handles,labels,loc='upper right', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
   py.tight_layout()
 
-  filename+='.png'
+  filename+='.pdf'
 
   checkdir('%s/gallery'%wdir)
   py.savefig(filename)

@@ -3,6 +3,7 @@ import os
 from tools.config import load_config,conf
 from fitlib.resman import RESMAN
 import numpy as np
+import pandas as pd
 
 #--matplotlib
 import matplotlib
@@ -48,12 +49,22 @@ def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
             print('Electoweak parameters not present.')
             return
 
-        ax11.plot([],[],label=label,color=color)
+
+        #--plot EIC kinematics
+        EIC = pd.read_excel('%s/database/EIC/expdata/3000.xlsx'%os.environ['FITPACK']).to_dict(orient='list')
+        Qmin = np.sqrt(np.min(EIC['Q2']))
+        Qmax = np.sqrt(np.max(EIC['Q2']))
+        ax11.axvspan(Qmin,Qmax,0,0.2,alpha=0.2,color='darkcyan')
         ##############################################
         #--plot offshell
         ##############################################
         weak = conf['eweak']
-        Q    = np.geomspace(1e-4,1e4,200)
+        Q    = np.geomspace(1e-4,1e4,500)
+        where = []
+        for i in range(len(Q)):
+            if Q[i] < Qmin:   where.append(0)
+            elif Q[i] > Qmax: where.append(0)
+            else:             where.append(1)
         cnt = 0
         sin2w = []
         for par in replicas:
@@ -72,8 +83,8 @@ def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
         if mode == 1:
             mean = np.mean(np.array(sin2w),axis=0)
             std  = np.std(np.array(sin2w),axis=0)
-            #ax11.plot(Q,mean,color=color)
-            ax11.fill_between(Q,mean-std,mean+std,color=color,alpha=1.0)
+            ax11.plot(Q,mean,color='black')
+            ax11.fill_between(Q,mean-std,mean+std,color=color,alpha=alpha,where=where,label=label)
 
         print
  
@@ -89,33 +100,26 @@ def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
     #--SoLID
     ax11.errorbar(10**(0.4),0.230,yerr = 0.2305-0.230, marker='o',capsize=3,color='black',fillstyle='none')
 
-
-    #--plot EIC kinematics
-    EIC = np.load('%s/database/EIC/3000.xlsx'%os.environ['FITPACK'])
-    Qmin = np.sqrt(EIC['Q2'])
-    Qmin = np.sqrt(2.6)
-    Qmax = np.sqrt(3981.1)
-    ax11.axvspan(Qmin,Qmax,alpha=0.2,color='darkcyan')
     ax11.text(5.0e0,0.226,r'\textrm{EIC}',size=20)
     ax11.text(8e0  ,0.24075, r'\textrm{$\nu$-DIS*}',size=16)
     ax11.text(1e-1 ,0.23550, r'\textrm{PVDIS}'     ,size=16)
     ax11.text(3e-2 ,0.24050, r'\textrm{E158}'      ,size=16)
     ax11.text(4e0  ,0.23000, r'\textrm{SoLID}'     ,size=16)
 
-    ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=15)
+    ax11.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
 
     ax11.set_ylim(0.224,0.246)
-    #ax11.set_ylim(0.2,0.5)
 
     ax11.set_xlim(1e-3,1e3)
     ax11.semilogx()
 
-    ax11.set_ylabel(r'$\sin^2(\theta_W)(Q)$',size=30)
-    ax11.set_xlabel(r'$Q~(GeV)$'         ,size=30)
-    #ax11.legend(frameon=False,loc='upper left',fontsize=15)
+    #ax11.text(0.05,0.85,r'\textrm{\textbf{JAM+EIC}}',transform=ax11.transAxes,size=30)
+    ax11.text(0.05,0.85,r'\textrm{\textbf{JAM}}',transform=ax11.transAxes,size=30)
+    ax11.text(0.05,0.05,r'\boldmath$\sin^2(\theta_W)$',transform=ax11.transAxes,size=30)
+    ax11.set_xlabel(r'\boldmath$Q~(\rm{GeV})$',size=30)
+    #ax11.legend(handles,labels,loc=(0.02,0.35), fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+    ax11.legend(loc=(0.02,0.22), fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
        
-    #ax11.text(0.1,0.1,r'$Q^2=%s{\rm~GeV^2}$'%q2,size=20,transform=ax11.transAxes)
- 
     py.tight_layout()
     filename = '%s/gallery/sin2w'%PLOT[0][0]
     if mode == 1: filename += '-bands'

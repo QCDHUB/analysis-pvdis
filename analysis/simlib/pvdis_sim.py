@@ -206,7 +206,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
     #if tar=='d': M2 = 4*M2
 
     #--luminosity
-    lum = str(data['lum'][0])+':fb-1'
+    lum = data['lum'][0]
     lum = convert_lum(lum)
 
     GF = conf['aux'].GF
@@ -343,7 +343,7 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     M2 = conf['aux'].M2
 
     #--luminosity
-    lum = str(data['lum'][0])+':fb-1'
+    lum = data['lum'][0]
     lum = convert_lum(lum)
 
     GF = conf['aux'].GF

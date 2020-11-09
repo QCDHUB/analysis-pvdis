@@ -308,7 +308,7 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
   #--mode 1: plot average and standard deviation of replicas 
 
   nrows,ncols=1,1
-  fig = py.figure(figsize=(ncols*7,nrows*4))
+  fig = py.figure(figsize=(ncols*7,nrows*6))
   ax11=py.subplot(nrows,ncols,1)
 
   filename = '%s/gallery/ppdfs-std-ratio'%PLOT[0][0]
@@ -373,14 +373,14 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
       for flav in ['up','dp','sp','g']:
           std = np.std(data['XF'][flav],axis=0)
 
-          if   flav=='up': color,label = 'red'        ,r'\boldmath$\Delta u^+$' 
-          elif flav=='dp': color,label = 'blue'       ,r'\boldmath$\Delta d^+$' 
-          elif flav=='sp': color,label = 'green'      ,r'\boldmath$\Delta s^+$' 
-          elif flav=='g':  color,label = 'orange'     ,r'\boldmath$\Delta g$' 
+          if   flav=='up': color,ls,label = 'blue'   ,'--'   ,r'\boldmath$\Delta u^+$' 
+          elif flav=='dp': color,ls,label = 'green'  ,'--'   ,r'\boldmath$\Delta d^+$' 
+          elif flav=='sp': color,ls,label = 'red'    ,'-'    ,r'\boldmath$\Delta s^+$' 
+          elif flav=='g':  color,ls,label = 'orange' ,':'    ,r'\boldmath$\Delta g$' 
           else: continue
 
           #--plot std over denom
-          ax11.plot(X,std/denom[flav],style,color=color,label=label,lw=5)
+          ax11.plot(X,std/denom[flav],style,color=color,label=label,lw=5,ls=ls)
 
   for ax in [ax11]:
         ax.set_xlim(1e-4,0.5)
@@ -392,14 +392,96 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
 
   ax11.axhline(1.0,alpha=0.5,ls='--',color='black')
   ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
-  ax11.text(0.55,0.25,r'\boldmath$\sigma^{\rm{EIC}}/\sigma$',transform=ax11.transAxes,size=40)
+  ax11.text(0.60,0.05,r'\boldmath$\delta^{\rm{EIC}}/\delta$',transform=ax11.transAxes,size=40)
 
-  if Q2 == 1.27**2: ax11.text(0.55,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
-  else:             ax11.text(0.55,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+  if Q2 == 1.27**2: ax11.text(0.05,0.90,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
+  else:             ax11.text(0.05,0.90,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
 
-  ax11.xaxis.set_label_coords(1.0,0.0)
+  ax11.xaxis.set_label_coords(0.95,0.0)
 
-  ax11.legend(loc='lower left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0 ,ncol=2, columnspacing = 1.0)
+  ax11.legend(loc='lower left', fontsize = 25, frameon = 0, handletextpad = 0.3, handlelength = 1.0 ,ncol=2, columnspacing = 1.0)
+  py.tight_layout()
+
+  filename+='.pdf'
+
+  checkdir('%s/gallery'%wdir)
+  py.savefig(filename)
+  print 'Saving figure to %s'%filename
+
+def plot_xf_std_ratio2(PLOT,kc,name=''):
+  #--mode 0: plot each replica
+  #--mode 1: plot average and standard deviation of replicas 
+
+  nrows,ncols=1,1
+  fig = py.figure(figsize=(ncols*7,nrows*6))
+  ax11=py.subplot(nrows,ncols,1)
+
+  filename = '%s/gallery/ppdfs-std-ratio2'%PLOT[0][0]
+
+  filename += name
+
+  j = 0
+  for plot in PLOT:
+
+      wdir, Q2, color, style, label, alpha = plot[0], plot[1], plot[2], plot[3], plot[4], plot[5]
+      load_config('%s/input.py'%wdir)
+      istep=core.get_istep()
+
+      #--load data if it exists
+      try:
+          if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+          else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+      #--generate data and then load it if it does not exist
+      except:
+          gen_xf(wdir,Q2)
+          if Q2==1.27**2: data=load('%s/data/ppdf-%d.dat'%(wdir,istep))
+          else: data=load('%s/data/ppdf-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+          
+      replicas=core.get_replicas(wdir)
+      cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+      best_cluster=cluster_order[0]
+
+      X=data['X']
+      X1 = data['X'][:100]
+      X2 = data['X'][100:]
+
+      for flav in ['up','dp','sp','g']:
+          mean = np.mean(data['XF'][flav],axis=0)
+          std  = np.std(data['XF'][flav],axis=0)
+
+          if j==0: ls = '--'
+          if j==1: ls = '-'
+          if   flav=='up': color,label = 'blue'     ,r'\boldmath$\Delta u^+$' 
+          elif flav=='dp': color,label = 'green'    ,r'\boldmath$\Delta d^+$' 
+          elif flav=='sp': color,label = 'red'      ,r'\boldmath$\Delta s^+$' 
+          elif flav=='g':  color,label = 'orange'   ,r'\boldmath$\Delta g$'
+          else: continue
+          if j==0: label=None
+
+          #--plot std over denom
+          ax11.plot(X,std,style,color=color,label=label,lw=5,ls=ls)
+      j+=1
+
+  for ax in [ax11]:
+        ax.set_xlim(1e-4,0.5)
+        ax.semilogx()
+        ax.semilogy()
+          
+        ax.tick_params(axis='both', which='major', top=True, right=True, direction='in',labelsize=25,length=5  ,width=1.5)
+        ax.tick_params(axis='both', which='minor', top=True, right=True, direction='in',labelsize=25,length=2.5,width=1.5)
+        ax.set_ylim(1e-3,1e-1)
+        #ax.set_yticks([0.2,0.4,0.6,0.8,1.0])
+
+  ax11.axhline(1.0,alpha=0.5,ls='--',color='black')
+  ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
+  #ax11.text(0.65,0.05,r'\boldmath$\delta^{\rm{EIC}}/\delta$',transform=ax11.transAxes,size=40)
+
+  if Q2 == 1.27**2: ax11.text(0.05,0.90,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
+  else:             ax11.text(0.05,0.90,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+
+  ax11.xaxis.set_label_coords(0.95,0.0)
+
+  ax11.legend(loc='lower right', fontsize = 25, frameon = 0, handletextpad = 0.3, handlelength = 1.0 ,ncol=2, columnspacing = 1.0)
   py.tight_layout()
 
   filename+='.png'
@@ -523,15 +605,16 @@ def plot_moments(PLOT,kc,mode=0,name=''):
       replicas=core.get_replicas(wdir)
 
       X=data['X']
-      for mom in ['G','Sigma']:
+      #for mom in ['G','Sigma']:
+      for mom in ['Sigma']:
           mean = np.mean(data['MOM'][mom],axis=0)
           std = np.std(data['MOM'][mom],axis=0)
 
           if j == 0:
-              if mom=='Sigma': color,alpha = 'orange',0.3
-              if mom=='G':     color,alpha = 'cyan'  ,0.3
+              if mom=='Sigma': color,alpha = 'yellow',0.9
+              if mom=='G':     color,alpha = 'cyan'  ,0.4
           if j == 1:
-              if mom=='Sigma': color,alpha = 'red'   ,1.0
+              if mom=='Sigma': color,alpha = 'red'   ,0.9
               if mom=='G':     color,alpha = 'blue'  ,1.0
           ax = ax11 
 
@@ -555,25 +638,23 @@ def plot_moments(PLOT,kc,mode=0,name=''):
         ax.set_xticks([1e-4,1e-3,1e-2,1e-1])
         #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
 
-  ax11.set_ylim(0.0,0.65)   ,ax11.set_yticks([0.1,0.2,0.3,0.4,0.5,0.6])
+  ax11.set_ylim(0.0,0.48)   ,ax11.set_yticks([0.1,0.2,0.3,0.4])
 
-  if Q2 == 1.27**2: ax11.text(0.55,0.85,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
-  else:             ax11.text(0.55,0.85,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+  #if Q2 == 1.27**2: ax11.text(0.45,0.05,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
+  #else:             ax11.text(0.45,0.05,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+
+  ax11.text(0.05,0.35,r'\boldmath$\int_{x_{\rm{min}}}^1 \Delta \Sigma (x) \, \rm{d} x$',transform=ax11.transAxes,size=40)
 
   handles = []
   handles.append(thy_band[(0,'Sigma')])
-  handles.append(thy_band[(0,'G')])
+  #handles.append(thy_band[(0,'G')])
   handles.append(thy_band[(1,'Sigma')])
-  handles.append(thy_band[(1,'G')])
+  #handles.append(thy_band[(1,'G')])
 
   labels = []
-  labels.append(r'\boldmath$\Delta \Sigma$')
-  labels.append(r'\boldmath$\Delta G$')
-  #labels.append(r'\boldmath$\Delta \Sigma~\rm{(EIC~A_{PV}^p)}$')
-  #labels.append(r'\boldmath$\Delta G~\rm{(EIC~A_{PV}^p)}$')
-  labels.append(r'\boldmath$\Delta \Sigma~\rm{(EIC)}$')
-  labels.append(r'\boldmath$\Delta G~\rm{(EIC)}$')
-  ax11.legend(handles,labels,loc='lower left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
+  labels.append(r'\textrm{\textbf{JAM}}')
+  labels.append(r'\textrm{\textbf{+EIC}}')
+  ax11.legend(handles,labels,loc='lower left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
 
 
   #--plot ratio of EIC/no EIC standard deviations
@@ -613,7 +694,8 @@ def plot_moments(PLOT,kc,mode=0,name=''):
 
       X=data['X']
 
-      for mom in ['G','Sigma']:
+      #for mom in ['G','Sigma']:
+      for mom in ['Sigma']:
           std = np.std(data['MOM'][mom],axis=0)
 
           if mom=='Sigma': color = 'red' 
@@ -637,22 +719,22 @@ def plot_moments(PLOT,kc,mode=0,name=''):
   ax21.set_yticks([0.2,0.4,0.6,0.8])
   #ax21.set_yticklabels([r'$0.2$',r'$0.4$',r'$0.6$',r'$0.8$'])
 
-  ax21.text(0.55,0.15,r'\boldmath$\sigma^{\rm{EIC}}/\sigma$', transform=ax21.transAxes,size=40)
+  ax21.text(0.02,0.12,r'\boldmath$\delta^{\rm{EIC}}/\delta$', transform=ax21.transAxes,size=40)
 
   handles = []
   handles.append(hand['Sigma'])
-  handles.append(hand['G'])
+  #handles.append(hand['G'])
 
   labels = []
   labels.append(r'\boldmath$\Delta \Sigma$')
-  labels.append(r'\boldmath$\Delta G$')
+  #labels.append(r'\boldmath$\Delta G$')
 
-  ax21.legend(handles,labels,loc='lower left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
+  #ax21.legend(handles,labels,loc='lower left', fontsize = 18, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 2, columnspacing = 1.0)
 
   py.tight_layout()
   py.subplots_adjust(hspace=0)
 
-  filename+='.png'
+  filename+='.pdf'
 
   checkdir('%s/gallery'%wdir)
   py.savefig(filename)
