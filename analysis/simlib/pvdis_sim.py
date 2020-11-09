@@ -345,7 +345,6 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
 
     #--luminosity
     lum = data['lum'][0]
-    print lum
     lum = convert_lum(lum)
 
     GF = conf['aux'].GF
