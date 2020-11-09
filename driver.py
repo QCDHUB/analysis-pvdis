@@ -88,22 +88,26 @@ force = False
 #########################
 ##--Simulation for PVDIS
 #########################
-kind  = 'e'
-tar   = 'd'
-est   = 'opt'
-obs   = 'mean'
-lum   = '100:fb-1'
-force = False
+kind  = 'had'    #--'e' for polarized electron, 'had' for polarized hadron
+tar   = 'p'      #--choose target: 'p', 'd', or 'h'
+est   = 'opt'    #--choose systematic errors (only 'opt' available)
+obs   = 'mean'   #--choose to use mean of replicas (currently no other options)
+force = False    #--if True, regenerate predictions
 
-#pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,lum=lum,force=force)
+FILT = []
+#inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
+pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,force=force)
+
+#pvdis.plot_errors(wdir)
 
 ######################
 ##--Initial Processing
 ######################
 FILT = []
-FILT.append(('dv1 c',-25,'less'))
+#FILT.append(('dv1 c',-25,'less'))
 #FILT.append(('g1 a',-0.5,'less'))
 #FILT.append(('uv1 b', 0.1,'less'))
+#FILT.append(('s2wMZ',0.235,'greater'))
 
 #inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
 #predict.get_predictions(wdir,force=False)
@@ -127,10 +131,6 @@ FILT.append(('dv1 c',-25,'less'))
 #--Plot proton pdfs
 ###################
 SETS = []
-#SETS.append('CJ15')
-#SETS.append('JAM19')
-#SETS.append('ABMP16')
-#SETS.append('NNPDF')
 
 #pdf.gen_xf(wdir,Q2)         
 #pdf.plot_xf(PLOT,kc,kind=0,mode=mode,name=name,SETS=SETS)
@@ -147,10 +147,13 @@ hist=False
 ##--Observable plots
 ####################
 
-pvdis.plot_obs(wdir,kc,'e','p')
-pvdis.plot_obs(wdir,kc,'e','d')
+#pvdis.plot_obs(wdir,kc,'e','p')
+#pvdis.plot_obs(wdir,kc,'e','d')
 #pvdis.plot_obs(wdir,kc,'had','p')
 
+#pvdis.compare(PLOT,kc,'e','p')
+#pvdis.compare(PLOT,kc,'e','d')
+#pvdis.compare(PLOT,kc,'had','p')
 
 ##---------------------------------------------------------------
 ##--Polarized
