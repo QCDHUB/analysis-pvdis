@@ -348,6 +348,8 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
 
     RS = np.array(data['RS'])
     S  = RS**2
+    El = np.array(data['El'])
+    Eh = np.array(data['Eh'])
 
     M2 = conf['aux'].M2
 
