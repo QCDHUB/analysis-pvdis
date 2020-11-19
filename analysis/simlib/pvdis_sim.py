@@ -61,7 +61,7 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs,lum):
     checkdir('%s/sim'%wdir)
 
     #-- the kinem. var.
-    data={_:[] for _ in ['col','target','X','Xdo','Xup','Q2','Q2do','Q2up','obs','value','stat_u','syst_u','norm_c','RS','lum']}
+    data={_:[] for _ in ['col','target','X','Xdo','Xup','Q2','Q2do','Q2up','obs','value','stat_u','syst_u','norm_c','RS','El','Eh','lum']}
 
     #--get specific points from data file at fitpack/database/pvdis/expdata/1000.xlsx
     fdir = os.environ['FITPACK']
@@ -77,6 +77,8 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs,lum):
     data['Q2up'] = grid['Q2up']
     data['Q2do'] = grid['Q2do']
     data['RS']   = grid['RS']
+    data['El']   = grid['El']
+    data['Eh']   = grid['Eh']
     if lum==None: data['lum']  = grid['lum']
 
     obs = 'A_PV_%s'%kind
@@ -202,9 +204,35 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
 
     RS = np.array(data['RS'])
     S  = RS**2
+    El = np.array(data['El'])
+    Eh = np.array(data['Eh'])
 
     M2 = conf['aux'].M2
-    #if tar=='d': M2 = 4*M2
+    M  = M2**0.5
+
+    #--new systematic errors
+    A  = np.array(value)
+    data['syst_u'] = np.zeros(len(X))
+
+    #--lepton rapidity
+    eta = np.log(np.sqrt(S/Q2)*X)
+
+    for i in range(len(X)):
+        if El[i] == 5:
+            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.00001
+            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.01
+            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.05
+            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
+        elif El[i] == 10:
+            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
+            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.04
+            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.08
+            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
+        elif El[i] == 18:
+            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
+            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.08
+            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.10
+            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.01
 
     #--luminosity
     lum = data['lum'][0]
@@ -284,7 +312,6 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
         N += (NR+NL)/len(replicas)
 
     #--theory asymmetry
-    A = np.array(value)
     stat2 = np.abs((1 + A**2)/N)
     stat = np.sqrt(stat2)
 
@@ -298,25 +325,6 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
     DAQ   = 0.0015 #DAQ pile up and dead time
     data['norm_c'] = np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A
 
-    Y = np.array(data['Q2'])/2/np.array(data['X'])/((S-M2)/2)
-    #--add systemic uncertainties
-    #--optimistic: 
-    if est == 'opt':
-        pion = 0.01  #pion background
-        rad  = 0.002 #radiative correction
-        data['syst_u'] = np.sqrt(pion**2 + rad**2)*A
-
-    #--moderate: do not have
-    elif est == 'mod':
-        return
-
-    #--pessimistic: do not have
-    elif est == 'pes':
-        return
-
-    else:
-        print('est must be opt, mod, or pes')
-        return
 
     return data['stat_u'],data['syst_u'],data['norm_c']
 
@@ -348,6 +356,30 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     lum = convert_lum(lum)
 
     GF = conf['aux'].GF
+
+    #--new systematic errors
+    A  = np.array(value)
+    data['syst_u'] = np.zeros(len(X))
+
+    #--lepton rapidity
+    eta = np.log(np.sqrt(S/Q2)*X)
+
+    for i in range(len(X)):
+        if El[i] == 5:
+            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.00001
+            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.01
+            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.05
+            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
+        elif El[i] == 10:
+            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
+            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.04
+            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.08
+            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
+        elif El[i] == 18:
+            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
+            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.08
+            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.10
+            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.01
 
     #--kinematic variables
     rho2 = 1 + 4*X**2*M2/Q2
@@ -433,22 +465,6 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     recon = 0.002  #reconstruction error
     DAQ   = 0.0015 #DAQ pile up and dead time
     data['norm_c'] = np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A
-
-    Y = np.array(data['Q2'])/2/np.array(data['X'])/((S-M2)/2)
-    #--add systemic uncertainties
-    #--optimistic: 
-    if est == 'opt':
-        pion = 0.01  #pion background
-        rad  = 0.002 #radiative correction
-        data['syst_u'] = np.sqrt(pion**2 + rad**2)*A
-
-    #--moderate: do not have
-    elif est == 'mod':
-        return
-
-    #--pessimistic: do not have
-    elif est == 'pes':
-        return
 
     return data['stat_u'],data['syst_u'],data['norm_c']
 
