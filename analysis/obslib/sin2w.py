@@ -118,7 +118,7 @@ def plot_sin2w(PLOT,kc,mode=0,name='',nrep=None):
     ax11.text(0.05,0.05,r'\boldmath$\sin^2(\theta_W)$',transform=ax11.transAxes,size=30)
     ax11.set_xlabel(r'\boldmath$Q~(\rm{GeV})$',size=30)
     #ax11.legend(handles,labels,loc=(0.02,0.35), fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
-    ax11.legend(loc=(0.02,0.22), fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
+    #ax11.legend(loc=(0.02,0.22), fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
        
     py.tight_layout()
     filename = '%s/gallery/sin2w'%PLOT[0][0]

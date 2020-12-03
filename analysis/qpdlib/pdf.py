@@ -501,7 +501,7 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
   ax11.legend(handles,labels,loc='lower right', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0, ncol = 3, columnspacing = 1.0)
   py.tight_layout()
 
-  filename+='.pdf'
+  filename+='.png'
 
   checkdir('%s/gallery'%wdir)
   py.savefig(filename)
@@ -588,7 +588,7 @@ def plot_xf_strange_compare(PLOT,kc,name=''):
   ax11.legend(handles,labels,loc='upper right', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
   py.tight_layout()
 
-  filename+='.pdf'
+  filename+='.png'
 
   checkdir('%s/gallery'%wdir)
   py.savefig(filename)

@@ -303,13 +303,17 @@ def plot_xf_strange(PLOT,kc,mode=0,name=''):
   py.savefig(filename)
   print 'Saving figure to %s'%filename
 
-def plot_xf_std_ratio(PLOT,kc,name=''):
+def plot_xf_std_ratio(PLOT,kc,name='',_ax=None):
   #--mode 0: plot each replica
   #--mode 1: plot average and standard deviation of replicas 
 
   nrows,ncols=1,1
-  fig = py.figure(figsize=(ncols*7,nrows*6))
-  ax11=py.subplot(nrows,ncols,1)
+  
+  if _ax==None:
+      fig = py.figure(figsize=(ncols*7,nrows*6))
+      ax11=py.subplot(nrows,ncols,1)
+  else:
+      ax11=_ax
 
   filename = '%s/gallery/ppdfs-std-ratio'%PLOT[0][0]
 
@@ -392,10 +396,10 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
 
   ax11.axhline(1.0,alpha=0.5,ls='--',color='black')
   ax11.set_xlabel(r'\boldmath$x$'    ,size=30)
-  ax11.text(0.60,0.05,r'\boldmath$\delta^{\rm{EIC}}/\delta$',transform=ax11.transAxes,size=40)
+  ax11.text(0.70,0.05,r'\boldmath$\delta^{\rm{EIC}}/\delta$',transform=ax11.transAxes,size=40)
 
-  if Q2 == 1.27**2: ax11.text(0.05,0.90,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
-  else:             ax11.text(0.05,0.90,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
+  if Q2 == 1.27**2: ax11.text(0.65,0.88,r'$Q^2 = m_c^2$',              transform=ax11.transAxes,size=30)
+  else:             ax11.text(0.65,0.88,r'$Q^2 = %s ~ \rm{GeV^2}$'%Q2, transform=ax11.transAxes,size=30)
 
   ax11.xaxis.set_label_coords(0.95,0.0)
 
@@ -404,9 +408,11 @@ def plot_xf_std_ratio(PLOT,kc,name=''):
 
   filename+='.pdf'
 
-  checkdir('%s/gallery'%wdir)
-  py.savefig(filename)
-  print 'Saving figure to %s'%filename
+  if _ax==None:
+      checkdir('%s/gallery'%wdir)
+      py.savefig(filename)
+      print 'Saving figure to %s'%filename
+  else: return ax11
 
 def plot_xf_std_ratio2(PLOT,kc,name=''):
   #--mode 0: plot each replica
@@ -490,13 +496,16 @@ def plot_xf_std_ratio2(PLOT,kc,name=''):
   py.savefig(filename)
   print 'Saving figure to %s'%filename
 
-def plot_xf(PLOT,kc,kind=0,mode=0,name='',PSETS=[],cmap=False):
+def plot_xf(PLOT,kc,kind=0,mode=0,name='',PSETS=[],cmap=False,_ax=None):
 
     if kind == 0:
         plot_xf_main(PLOT,kc,mode,name,PSETS,cmap)
         plot_xf_strange(PLOT,kc,mode,name)
     if kind == 1:
-        plot_xf_std_ratio(PLOT,kc,name)
+        if _ax==None:
+            plot_xf_std_ratio(PLOT,kc,name,_ax=_ax)
+        else:
+            return plot_xf_std_ratio(PLOT,kc,name,_ax=_ax)
 
 moments = []
 moments.append('Sigma')
@@ -577,14 +586,17 @@ def gen_moments(wdir,Q2 = 1.27**2):
     else:
         save({'X': X, 'Q2': Q2, 'MOM': MOM}, '%s/data/ppdf-moments-%d-Q2=%d.dat' % (wdir, istep, int(Q2)))
         
-def plot_moments(PLOT,kc,mode=0,name=''):
+def plot_moments(PLOT,kc,mode=0,name='',_ax=None):
   #--mode 0: plot each replica
   #--mode 1: plot average and standard deviation of replicas 
 
   nrows,ncols=4,1
-  fig = py.figure(figsize=(ncols*7,nrows*1.5))
-  ax11=py.subplot(nrows,ncols,(1,3))
-  ax21=py.subplot(nrows,ncols,4)
+  if _ax==None:
+      fig = py.figure(figsize=(ncols*7,nrows*1.5))
+      ax11=py.subplot(nrows,ncols,(1,3))
+      ax21=py.subplot(nrows,ncols,4)
+  else:
+      ax11,ax21 = _ax
 
   filename = '%s/gallery/ppdf-moments'%PLOT[0][0]
 
@@ -736,11 +748,103 @@ def plot_moments(PLOT,kc,mode=0,name=''):
 
   filename+='.pdf'
 
-  checkdir('%s/gallery'%wdir)
-  py.savefig(filename)
-  print 'Saving figure to %s'%filename
+  if _ax==None:
+      checkdir('%s/gallery'%wdir)
+      py.savefig(filename)
+      print 'Saving figure to %s'%filename
+  else:
+      return ax21
         
-        
+def plot_moments_std_ratio(PLOT,kc,mode=0,name='',_ax=None):
+  #--mode 0: plot each replica
+  #--mode 1: plot average and standard deviation of replicas 
+
+  nrows,ncols=1,1
+  if _ax==None:
+      fig = py.figure(figsize=(ncols*7,nrows*1.5))
+      ax21=py.subplot(nrows,ncols,4)
+  else:
+      ax21 = _ax
+
+  filename = '%s/gallery/ppdf-moments-std-ratio'%PLOT[0][0]
+
+  filename += name
+
+  #--plot ratio of EIC/no EIC standard deviations
+  #--get denominator
+  wdir, Q2, color, style, label, alpha = PLOT[0][0], PLOT[0][1], PLOT[0][2], PLOT[0][3], PLOT[0][4], PLOT[0][5]
+  load_config('%s/input.py'%wdir)
+  istep=core.get_istep()
+  if Q2==1.27**2: data=load('%s/data/ppdf-moments-%d.dat'%(wdir,istep))
+  else: data=load('%s/data/ppdf-moments-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+      
+  replicas=core.get_replicas(wdir)
+  cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+  best_cluster=cluster_order[0]
+
+  X=data['X']
+
+  denom = {}
+  for mom in data['MOM']:
+      denom[mom] = np.std(data['MOM'][mom],axis=0)
+
+  j = 0
+  hand = {}
+  for plot in PLOT:
+      j+=1
+      if j == 1: continue
+
+      wdir, Q2, color, style, label, alpha = plot[0], plot[1], plot[2], plot[3], plot[4], plot[5]
+      load_config('%s/input.py'%wdir)
+      istep=core.get_istep()
+
+      if Q2==1.27**2: data=load('%s/data/ppdf-moments-%d.dat'%(wdir,istep))
+      else: data=load('%s/data/ppdf-moments-%d-Q2=%d.dat'%(wdir,istep,int(Q2)))
+          
+      replicas=core.get_replicas(wdir)
+      cluster,colors,nc,cluster_order = classifier.get_clusters(wdir,istep,kc) 
+      best_cluster=cluster_order[0]
+
+      X=data['X']
+
+      for mom in ['G','Sigma']:
+          std = np.std(data['MOM'][mom],axis=0)
+
+          if mom=='Sigma': color = 'red' 
+          if mom=='G':     color = 'blue'
+          ax = ax21 
+
+          hand[mom] ,= ax.plot(X,std/denom[mom],color=color,lw=5)
+
+  for ax in [ax21]:
+        ax.set_xlim(1e-4,1)
+        ax.semilogx()
+          
+        ax.tick_params(axis='both', which='both', top=True, right=True, direction='in',labelsize=25)
+        ax.set_xticks([1e-4,1e-3,1e-2,1e-1])
+        #ax.set_xticklabels([r'$0.01$',r'$0.1$',r'$0.5$',r'$0.8$'])
+ 
+  ax21.set_xlabel(r'\boldmath$x_{\rm{min}}$'    ,size=30)
+  ax21.xaxis.set_label_coords(0.95,0.0)
+
+  ax21.set_ylim(0,1.2) ,ax.set_yticks([0.2,0.4,0.6,0.8,1.0])
+  ax21.axhline(1.0,alpha=0.5,ls='--',color='black')
+
+  ax21.text(0.70,0.05,r'\boldmath$\delta^{\rm{EIC}}/\delta$', transform=ax21.transAxes,size=40)
+  ax21.text(0.05,0.28,r'\boldmath$\int_{x_{\rm{min}}}^1 \Delta \Sigma (x) \, \rm{d} x$',color='red' ,transform=ax21.transAxes,size=40)
+  ax21.text(0.05,0.08,r'\boldmath$\int_{x_{\rm{min}}}^1 \Delta  g     (x) \, \rm{d} x$',color='blue',transform=ax21.transAxes,size=40)
+
+  py.tight_layout()
+  py.subplots_adjust(hspace=0)
+
+  filename+='.pdf'
+
+  if _ax==None:
+      checkdir('%s/gallery'%wdir)
+      py.savefig(filename)
+      print 'Saving figure to %s'%filename
+  else:
+      return ax21
         
         
         
