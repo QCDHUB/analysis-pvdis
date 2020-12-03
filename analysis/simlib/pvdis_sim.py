@@ -260,7 +260,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
     idis.data[tar]['F2gZ'] = np.zeros(idis.X.size)
     idis.data[tar]['FLgZ'] = np.zeros(idis.X.size)
     idis.data[tar]['F3gZ'] = np.zeros(idis.X.size)
-    if tar == 'd':
+    if tar == 'd' or tar=='h':
         idis.data['p']['F2g']  = np.zeros(idis.X.size)
         idis.data['p']['FLg']  = np.zeros(idis.X.size)
         idis.data['p']['F2gZ'] = np.zeros(idis.X.size)
@@ -289,7 +289,7 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
         F2gZ = idis.get_stf(X,Q2,stf='F2gZ',tar=tar)
         FLgZ = idis.get_stf(X,Q2,stf='FLgZ',tar=tar)
         F3gZ = idis.get_stf(X,Q2,stf='F3gZ',tar=tar)
- 
+
         C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
   
         C1 = np.pi*alpha**2/(X*y*Q2)
@@ -407,6 +407,22 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     idis.data [tar]['F2gZ'] = np.zeros(idis.X.size)
     idis.data [tar]['FLgZ'] = np.zeros(idis.X.size)
     idis.data [tar]['F3gZ'] = np.zeros(idis.X.size)
+    if tar=='d' or tar=='h':
+        pidis.data['p']['g1gZ'] = np.zeros(pidis.X.size)
+        pidis.data['p']['g5gZ'] = np.zeros(pidis.X.size)
+        idis.data ['p']['F2g']  = np.zeros(idis.X.size)
+        idis.data ['p']['FLg']  = np.zeros(idis.X.size)
+        idis.data ['p']['F2gZ'] = np.zeros(idis.X.size)
+        idis.data ['p']['FLgZ'] = np.zeros(idis.X.size)
+        idis.data ['p']['F3gZ'] = np.zeros(idis.X.size)
+        pidis.data['n']['g1gZ'] = np.zeros(pidis.X.size)
+        pidis.data['n']['g5gZ'] = np.zeros(pidis.X.size)
+        idis.data ['n']['F2g']  = np.zeros(idis.X.size)
+        idis.data ['n']['FLg']  = np.zeros(idis.X.size)
+        idis.data ['n']['F2gZ'] = np.zeros(idis.X.size)
+        idis.data ['n']['FLgZ'] = np.zeros(idis.X.size)
+        idis.data ['n']['F3gZ'] = np.zeros(idis.X.size)
+
     idis   = resman.idis_thy
     pidis  = resman.pidis_thy
 
@@ -429,7 +445,7 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
         FLg  = idis .get_stf(X,Q2,stf='FLg'  ,tar=tar) 
         F2gZ = idis .get_stf(X,Q2,stf='F2gZ' ,tar=tar) 
         FLgZ = idis .get_stf(X,Q2,stf='FLgZ' ,tar=tar) 
-        F3gZ = idis .get_stf(X,Q2,stf='F3gZ' ,tar=tar) 
+        F3gZ = idis .get_stf(X,Q2,stf='F3gZ' ,tar=tar)
 
         C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
   
