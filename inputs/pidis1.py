@@ -27,6 +27,7 @@ conf['nuc'] = True
 conf['offshell'] = False
 # conf['sidis nuc smearing'] = False
 # conf['hq'] = False
+conf['pidis nuc'] = True
 
 
 
