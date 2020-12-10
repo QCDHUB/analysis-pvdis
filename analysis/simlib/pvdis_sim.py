@@ -41,7 +41,7 @@ def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',lum=None,force=True):
 
     #--get predictions on new data file if not already done
     print('Generating predictions...')
-    name = 'pvdis-%s-%s-%s'%(kind,tar,est)
+    name = 'pvdis-%s-%s'%(kind,tar)
     predict.get_predictions(wdir,force=force,mod_conf=conf,name=name)
 
     #--update tables
@@ -136,7 +136,7 @@ def gen_conf(wdir,kind,tar,est,obs):
 def update_tabs(wdir,kind,tar,est,obs):
 
     istep=core.get_istep()
-    data=load('%s/data/predictions-%d-pvdis-%s-%s-%s.dat'%(wdir,istep,kind,tar,est))
+    data=load('%s/data/predictions-%d-pvdis-%s-%s.dat'%(wdir,istep,kind,tar))
 
     blist=[]
     blist.append('thy')
@@ -210,6 +210,10 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
     M2 = conf['aux'].M2
     M  = M2**0.5
 
+    #--luminosity
+    lum = data['lum'][0]
+    lum = convert_lum(lum)
+
     #--new systematic errors
     A  = np.array(value)
     data['syst_u'] = np.zeros(len(X))
@@ -217,60 +221,47 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
     #--lepton rapidity
     eta = np.log(np.sqrt(S/Q2)*X)
 
-    for i in range(len(X)):
-        if El[i] == 5:
-            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.00001
-            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.01
-            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.05
-            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
-        elif El[i] == 10:
-            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
-            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.04
-            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.08
-            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
-        elif El[i] == 18:
-            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
-            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.08
-            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.10
-            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.01
-
-    #--luminosity
-    lum = data['lum'][0]
-    lum = convert_lum(lum)
-
-    GF = conf['aux'].GF
+    if est=='mod':
+        for i in range(len(X)):
+            if El[i] == 5:
+                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.000001
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.1
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*5
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+            elif El[i] == 10:
+                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.4
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*8
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+            elif El[i] == 18:
+                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.8
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*10
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*1
+    if est=='opt':
+        data['syst_u'] = A*0.01
 
     #--kinematic variables
-    rho2 =  1 + 4*X**2*M2/Q2
-    y= (Q2/2/X)/((S)/2)
-    YP = y**2*(rho2+1)/2 - 2*y +2
+    rho2 = 1 + 4*X**2*M2/Q2
+    y = (Q2/2/X)/((S)/2)
+    YP = y**2 - 2*y +2
     YM = 1-(1-y)**2
-    sin2w = np.array([conf['eweak'].get_sin2w(q2) for q2 in Q2])
     alpha = np.array([conf['eweak'].get_alpha(q2) for q2 in Q2])
-    gA = -0.5
-    gV = -0.5 + 2*sin2w
 
     #--get structure functions
     resman=RESMAN(parallel=False,datasets=False)
     parman = resman.parman
     resman.setup_idis()
     idis  = resman.idis_thy
-    idis.data[tar]['F2g']  = np.zeros(idis.X.size)
-    idis.data[tar]['FLg']  = np.zeros(idis.X.size)
-    idis.data[tar]['F2gZ'] = np.zeros(idis.X.size)
-    idis.data[tar]['FLgZ'] = np.zeros(idis.X.size)
-    idis.data[tar]['F3gZ'] = np.zeros(idis.X.size)
-    if tar == 'd' or tar=='h':
-        idis.data['p']['F2g']  = np.zeros(idis.X.size)
-        idis.data['p']['FLg']  = np.zeros(idis.X.size)
-        idis.data['p']['F2gZ'] = np.zeros(idis.X.size)
-        idis.data['p']['FLgZ'] = np.zeros(idis.X.size)
-        idis.data['p']['F3gZ'] = np.zeros(idis.X.size)
-        idis.data['n']['F2g']  = np.zeros(idis.X.size)
-        idis.data['n']['FLg']  = np.zeros(idis.X.size)
-        idis.data['n']['F2gZ'] = np.zeros(idis.X.size)
-        idis.data['n']['FLgZ'] = np.zeros(idis.X.size)
-        idis.data['n']['F3gZ'] = np.zeros(idis.X.size)
+    idis.data [tar]['F2']  = np.zeros(idis.X.size)
+    idis.data [tar]['FL']  = np.zeros(idis.X.size)
+    if tar=='d' or tar=='h':
+        idis.data ['p']['F2']  = np.zeros(idis.X.size)
+        idis.data ['p']['FL']  = np.zeros(idis.X.size)
+        idis.data ['n']['F2']  = np.zeros(idis.X.size)
+        idis.data ['n']['FL']  = np.zeros(idis.X.size)
+
+    idis   = resman.idis_thy
 
     #--get average over replicas
     istep = sorted(conf['steps'])[-1]
@@ -284,32 +275,17 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
         par = replicas[i]
         parman.set_new_params(par,initial=True)
         idis._update()
-        F2g  = idis.get_stf(X,Q2,stf='F2g',tar=tar)
-        FLg  = idis.get_stf(X,Q2,stf='FLg',tar=tar)
-        F2gZ = idis.get_stf(X,Q2,stf='F2gZ',tar=tar)
-        FLgZ = idis.get_stf(X,Q2,stf='FLgZ',tar=tar)
-        F3gZ = idis.get_stf(X,Q2,stf='F3gZ',tar=tar)
+        F2  = idis .get_stf(X,Q2,stf='F2'  ,tar=tar) 
+        FL  = idis .get_stf(X,Q2,stf='FL'  ,tar=tar)
+        F1  = (F2-FL)/(2*X) 
 
-        C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
-  
-        C1 = np.pi*alpha**2/(X*y*Q2)
+        C1 = 8*np.pi*alpha**2/(X**2*Q2*S)
 
-        T1g  = YP*F2g  - y**2*FLg
-        T1gZ = YP*F2gZ - y**2*FLgZ
+        T1 = X*y*F1 +(1-y)/y*F2
 
-        T2 = X*YM*F3gZ
+        n  = lum*C1*T1*bins
 
-        sigR = C1*(T1g + C*(gV-gA)*(T1gZ - T2))
-        sigL = C1*(T1g + C*(gV+gA)*(T1gZ + T2))
-
-        ##--Jacobian d/dy -> d/dQ2
-        yjac = 1/(X*S)
-
-        #--assuming same luminosity
-        NR = lum*sigR*yjac*bins
-        NL = lum*sigL*yjac*bins
-
-        N += (NR+NL)/len(replicas)
+        N += n/len(replicas)
 
     #--theory asymmetry
     stat2 = np.abs((1 + A**2)/N)
@@ -366,22 +342,25 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     #--lepton rapidity
     eta = np.log(np.sqrt(S/Q2)*X)
 
-    for i in range(len(X)):
-        if El[i] == 5:
-            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.00001
-            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.01
-            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.05
-            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
-        elif El[i] == 10:
-            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
-            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.04
-            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.08
-            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.10
-        elif El[i] == 18:
-            if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
-            elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.08
-            elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*0.10
-            elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*0.01
+    if est=='mod':
+        for i in range(len(X)):
+            if El[i] == 5:
+                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.000001
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.1
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*5
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+            elif El[i] == 10:
+                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.4
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*8
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+            elif El[i] == 18:
+                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.8
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*10
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*1
+    if est=='opt':
+        data['syst_u'] = A*0.01
 
     #--kinematic variables
     rho2 = 1 + 4*X**2*M2/Q2
@@ -397,34 +376,16 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     resman=RESMAN(parallel=False,datasets=False)
     parman = resman.parman
     resman.setup_idis()
-    resman.setup_pidis()
-    pidis = resman.pidis_thy
     idis  = resman.idis_thy
-    pidis.data[tar]['g1gZ'] = np.zeros(pidis.X.size)
-    pidis.data[tar]['g5gZ'] = np.zeros(pidis.X.size)
-    idis.data [tar]['F2g']  = np.zeros(idis.X.size)
-    idis.data [tar]['FLg']  = np.zeros(idis.X.size)
-    idis.data [tar]['F2gZ'] = np.zeros(idis.X.size)
-    idis.data [tar]['FLgZ'] = np.zeros(idis.X.size)
-    idis.data [tar]['F3gZ'] = np.zeros(idis.X.size)
+    idis.data [tar]['F2']  = np.zeros(idis.X.size)
+    idis.data [tar]['FL']  = np.zeros(idis.X.size)
     if tar=='d' or tar=='h':
-        pidis.data['p']['g1gZ'] = np.zeros(pidis.X.size)
-        pidis.data['p']['g5gZ'] = np.zeros(pidis.X.size)
-        idis.data ['p']['F2g']  = np.zeros(idis.X.size)
-        idis.data ['p']['FLg']  = np.zeros(idis.X.size)
-        idis.data ['p']['F2gZ'] = np.zeros(idis.X.size)
-        idis.data ['p']['FLgZ'] = np.zeros(idis.X.size)
-        idis.data ['p']['F3gZ'] = np.zeros(idis.X.size)
-        pidis.data['n']['g1gZ'] = np.zeros(pidis.X.size)
-        pidis.data['n']['g5gZ'] = np.zeros(pidis.X.size)
-        idis.data ['n']['F2g']  = np.zeros(idis.X.size)
-        idis.data ['n']['FLg']  = np.zeros(idis.X.size)
-        idis.data ['n']['F2gZ'] = np.zeros(idis.X.size)
-        idis.data ['n']['FLgZ'] = np.zeros(idis.X.size)
-        idis.data ['n']['F3gZ'] = np.zeros(idis.X.size)
+        idis.data ['p']['F2']  = np.zeros(idis.X.size)
+        idis.data ['p']['FL']  = np.zeros(idis.X.size)
+        idis.data ['n']['F2']  = np.zeros(idis.X.size)
+        idis.data ['n']['FL']  = np.zeros(idis.X.size)
 
     idis   = resman.idis_thy
-    pidis  = resman.pidis_thy
 
     #--get average over replicas
     istep = sorted(conf['steps'])[-1]
@@ -438,36 +399,17 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
         par = replicas[i]
         parman.set_new_params(par,initial=True)
         idis._update()
-        pidis._update()
-        g1gZ = pidis.get_stf(X,Q2,stf='g1gZ',tar=tar) 
-        g5gZ = pidis.get_stf(X,Q2,stf='g5gZ',tar=tar) 
-        F2g  = idis .get_stf(X,Q2,stf='F2g'  ,tar=tar) 
-        FLg  = idis .get_stf(X,Q2,stf='FLg'  ,tar=tar) 
-        F2gZ = idis .get_stf(X,Q2,stf='F2gZ' ,tar=tar) 
-        FLgZ = idis .get_stf(X,Q2,stf='FLgZ' ,tar=tar) 
-        F3gZ = idis .get_stf(X,Q2,stf='F3gZ' ,tar=tar)
+        F2  = idis .get_stf(X,Q2,stf='F2'  ,tar=tar) 
+        FL  = idis .get_stf(X,Q2,stf='FL'  ,tar=tar)
+        F1  = (F2-FL)/(2*X) 
 
-        C  = GF*Q2/(2*np.sqrt(2)*np.pi*alpha)
-  
-        C1 = np.pi*alpha**2/(X*y*Q2)
+        C1 = 8*np.pi*alpha**2/(X**2*Q2*S)
 
-        T1g  = YP*F2g  - y**2*FLg
-        T1gZ = YP*F2gZ - y**2*FLgZ
+        T1 = X*y*F1 +(1-y)/y*F2
 
-        T2 = X*YM*F3gZ
+        n  = lum*C1*T1*bins
 
-        T3 = YP*gV*g5gZ + YM*gA*g1gZ
-
-        sigR = C1*(T1g + C*(gV*T1gZ + gA*T2) + 2*X*C*T3)
-        sigL = C1*(T1g + C*(gV*T1gZ + gA*T2) - 2*X*C*T3)
-
-        ##--Jacobian d/dy -> d/dQ2
-        yjac = 1/(X*S)
-
-        NR = lum*sigR*yjac*bins
-        NL = lum*sigL*yjac*bins
-      
-        N += (NR+NL)/len(replicas)
+        N += n/len(replicas)
 
     #--theory asymmetry
     A = np.array(value)
