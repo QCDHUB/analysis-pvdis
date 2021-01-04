@@ -1,0 +1,21 @@
+prediction   reaction        idx                  col  npts       chi2  chi2/npts       norm 
+     False       idis      10016                BCDMS   348     408.51       1.17       0.97 
+     False       idis      10017                BCDMS   254     274.15       1.08       0.99 
+     False       idis      10020                  NMC   273     463.38       1.70       0.99 
+     False       idis      10021                  NMC   174     160.01       0.92 
+     False       idis      10026    HERA II NC e+ (1)   402     615.97       1.53 
+     False       idis      10027    HERA II NC e+ (2)    75      82.47       1.10 
+     False       idis      10028    HERA II NC e+ (3)   259     261.33       1.01 
+     False       idis      10029    HERA II NC e+ (4)   209     228.08       1.09 
+     False       idis      10030        HERA II NC e-   159     254.88       1.60 
+     False       idis      10031        HERA II CC e+    39      57.61       1.48 
+     False       idis      10032        HERA II CC e-    42      43.74       1.04 
+     False       idis      10010                 SLAC   218     200.76       0.92       1.02 
+     False       idis      10011                 SLAC   228     159.78       0.70       1.01 
+     False        jet      10001                   d0   110      99.75       0.91 
+     False        jet      10002                  cdf    76      78.57       1.03 
+     False        jet      10003                 star     2       0.05       0.03 
+     False        jet      10004                 star     8      12.31       1.54 
+     False         dy      10001                 E866   121     141.46       1.17       1.02 
+     False         dy      10002                 E866   129     121.71       0.94       1.03 
+                                                       3126    3664.53       1.17           
