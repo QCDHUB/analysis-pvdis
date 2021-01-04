@@ -42,13 +42,16 @@ def get_msr_inspected(wdir,limit=3,FILT=[]):
         params = replica['params'][istep]
         flag = False
         for filt in FILT:
+            dist, par, _, lim = filt[0],filt[1],filt[2],filt[3]
             for j in range(len(order)):
-                if order[j][2] == filt[0]:
-                    if filt[2] == 'greater':
-                        if params[j] > filt[1]: flag = True 
-                    if filt[2] == 'less':
-                        if params[j] < filt[1]: flag = True
+                if order[j][1] == dist:
+                    if order[j][2] == par:
+                        if _ == '>':
+                            if params[j] > lim: flag = True 
+                        if _ == '<':
+                            if params[j] < lim: flag = True
         if flag: continue
+
         if params is None: continue
         if istep not in replica['chi2']: data=replica['chi2']
         else:                            data=replica['chi2'][istep]
@@ -73,11 +76,14 @@ def get_msr_inspected(wdir,limit=3,FILT=[]):
     #print np.mean(X)
     #--plot labeled residuals
     ax=py.subplot(nrows,ncols,1)
-    ax.hist(X,bins=10)
-    py.title('step0%s chi2 distribution'%istep)
+    ax.hist(X,bins=10) 
+    if istep < 10: title = r'\textrm{\textbf{step0%s $\chi^2$ distribution}}'%istep
+    else:          title = r'\textrm{\textbf{step%s $\chi^2$ distribution}}'%istep
+    py.title(title,size=20)
+    ax.tick_params(axis='both',which='both',top=True,right=True,direction='in',labelsize=20)
     #py.tight_layout()
     checkdir('%s/gallery'%wdir)
-    py.savefig('%s/gallery/chi2-dist-inspect.pdf'%(wdir))
+    py.savefig('%s/gallery/chi2-dist-inspect.png'%(wdir))
     py.close()
 
 

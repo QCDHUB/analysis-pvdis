@@ -13,16 +13,18 @@ from tools.tools import checkdir,load
 user    ='ccocuzza'
 path    ='/work/JAM/'
 fitpack ='%s/ccocuzza/fitpack'%path
+#fitpack ='%s/ccocuzza/fitpack3'%path
 wdir    ='%s/ccocuzza/pvdis'%path
 python  ='%s/apps/anaconda2/bin/python'%path
+#python  ='%s/apps/anaconda3/bin/python'%path
 
 
 template="""#!/bin/csh
 #SBATCH --account=theory
 #SBATCH --nodes 1
 #SBATCH --partition=production
-#SBATCH --cpus-per-task 2
-#SBATCH --mem=4G
+#SBATCH --cpus-per-task <cpu>
+#SBATCH --mem=<mem>G
 #SBATCH --time=0-96:00:00
 #SBATCH --constraint=general
 #SBATCH --job-name="<name>"
@@ -40,7 +42,7 @@ template=template.replace('<fitpack>',fitpack)
 template=template.replace('<wdir>',wdir)
 
 
-def gen_script(track,directory,step,prior=None,INPUT='input',verbose=5):
+def gen_script(track,directory,step,prior=None,INPUT='input',cpu=4,mem=4,verbose=5):
     fname='jam-%s-%s'%(step,id_generator(size=10))
     script=template[:]
     script=script.replace('<name>',fname)
@@ -48,6 +50,8 @@ def gen_script(track,directory,step,prior=None,INPUT='input',verbose=5):
     script=script.replace('<directory>',directory)
     script=script.replace('<verbose>',str(verbose))
     script=script.replace('<input>',str(INPUT))
+    script=script.replace('<cpu>',str(cpu))
+    script=script.replace('<mem>',str(mem))
     if  prior==None: 
         script=script.replace('<prior>','')
     else: 
@@ -69,14 +73,15 @@ if __name__=='__main__':
     msg+=" 1: with priors"
     msg+=" 2: with opt-priors"
 
-    ap.add_argument('task'             ,type=int,help=msg)
-    ap.add_argument('-d','--directory' ,type=str,default='unamed' 
-                                       ,help='directory name to store results')
-    ap.add_argument('-p','--priors'    ,type=str,default='unamed' ,help='priors')
-    ap.add_argument('-n','--njobs'     ,type=int,default=1 ,help='number of jobs')
-    ap.add_argument('-t','--test'      ,type=bool,default=False ,help='test flag')
-    ap.add_argument('-s','--step'      ,type=str,default='01', help='step for job naming purposes')
-    ap.add_argument('-i','--INPUT'     ,type=str,default='input', help='input file to use')
+    ap.add_argument('task'             ,type=int                     ,help=msg)
+    ap.add_argument('-d','--directory' ,type=str ,default='unamed'   ,help='directory name to store results')
+    ap.add_argument('-p','--priors'    ,type=str ,default='unamed'   ,help='priors')
+    ap.add_argument('-n','--njobs'     ,type=int ,default=None       ,help='number of jobs')
+    ap.add_argument('-t','--test'      ,type=bool,default=False      ,help='test flag')
+    ap.add_argument('-s','--step'      ,type=str ,default='01'       ,help='step for job naming purposes')
+    ap.add_argument('-i','--INPUT'     ,type=str ,default='input.py' ,help='input file to use')
+    ap.add_argument('-c','--cpu'       ,type=str ,default=4          ,help='number of cpus')
+    ap.add_argument('-m','--mem'       ,type=str ,default=4          ,help='GB of memory')
     args = ap.parse_args()
 
     if args.directory=='unamed': pexit('specify -d')
@@ -92,7 +97,7 @@ if __name__=='__main__':
           while 1:
               cnt+=1 
               print cnt
-              gen_script(track,args.directory,args.step,None,INPUT=args.INPUT)
+              gen_script(track,args.directory,args.step,None,INPUT=args.INPUT,cpu=args.cpu,mem=args.mem)
               if args.test:
                   os.system('source current.sbatch')
                   break
@@ -115,11 +120,11 @@ if __name__=='__main__':
           done = os.listdir('%s/%s/msr'%(wdir,args.directory))
           cnt=0
           for prior in msr:
+              if cnt==args.njobs: break
               cnt+=1
-              #if cnt==2: break
               print('%d/%d'%(cnt,len(msr)))
               if prior in done: continue 
-              gen_script(track,args.directory,args.step,'%s/%s'%(path2priors,prior),INPUT=args.INPUT)
+              gen_script(track,args.directory,args.step,'%s/%s'%(path2priors,prior),INPUT=args.INPUT,cpu=args.cpu,mem=args.mem)
               os.system('sbatch current.sbatch')
               if args.test: break
               time.sleep(0.2)

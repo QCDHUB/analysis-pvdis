@@ -8,7 +8,8 @@ import numpy as np
 from subprocess import Popen, PIPE
 from scipy.integrate import quad
 
-import lhapdf
+try: import lhapdf
+except: pass
 
 #--from analysis
 from analysis.corelib import core
