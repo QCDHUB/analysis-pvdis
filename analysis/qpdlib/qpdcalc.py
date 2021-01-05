@@ -2,7 +2,8 @@
 import sys,os
 import numpy as np
 import pylab as py
-import lhapdf
+try: import lhapdf
+except: pass
 
 class QPDCALC:
 

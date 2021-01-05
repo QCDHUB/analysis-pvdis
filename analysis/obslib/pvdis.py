@@ -567,8 +567,8 @@ def plot_errors(wdir):
 
     hand = {}
     for tar in ['p','d']:
-        if tar == 'p': idx,color = 90001,'firebrick'
-        if tar == 'd': idx,color = 90002,'darkgreen'
+        if tar == 'p': idx,color = 90101,'firebrick'
+        if tar == 'd': idx,color = 90102,'darkgreen'
         tab  = pd.read_excel('%s/database/EIC/expdata/%s.xlsx'%(os.environ['FITPACK'],idx)).to_dict(orient='list')
         X     = np.array(tab['X'])
         value = np.array(tab['value'])

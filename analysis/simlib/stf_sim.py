@@ -12,7 +12,8 @@ matplotlib.rc('text',usetex=True)
 import pylab  as py
 from matplotlib.lines import Line2D
 
-import lhapdf
+try:import lhapdf
+except: pass
 
 #--from analysis
 from analysis.corelib import core, predict

@@ -76,9 +76,10 @@ def gen_xf(wdir,Q2 = 1.27**2):
 
             XF[flavor].append([func(x) for x in X])
 
-            #if flavor=='g':
-            #    if func(1e-3) > 0.3: print names[i]
-            #    if func(1e-3) < -0.2: print names[i]
+            if flavor=='g':
+                if func(0.3) < -0.1: 
+                  print
+                  print names[i]
 
 
     print

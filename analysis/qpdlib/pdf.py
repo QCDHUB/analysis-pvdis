@@ -8,7 +8,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import cm
 matplotlib.rcParams['text.latex.preview']=True
 import pylab as py
-import lhapdf
 
 #--from scipy stack 
 from scipy.integrate import quad

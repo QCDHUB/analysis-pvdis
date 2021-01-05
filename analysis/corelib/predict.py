@@ -17,7 +17,7 @@ from tools.randomstr import id_generator
 from fitlib.resman import RESMAN
 
 #--from local
-import core
+from analysis.corelib import core
 
 def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
 
@@ -38,7 +38,7 @@ def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
     core.mod_conf(istep,replicas[0]) #--set conf as specified in istep
 
     #--choose parallelization based on what experiments are present
-    nopar = ['idis','pidis','sidis','sia']
+    nopar = ['idis','pidis','sidis','sia','SU23']
     _ncores = 1
     parallel = False
     for exp in conf['steps'][istep]['datasets']:
@@ -47,6 +47,7 @@ def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
             _ncores = ncores
 
     #--run RESMAN
+    conf['predict'] = True
     resman=RESMAN(nworkers=_ncores,parallel=parallel,datasets=True)
     parman=resman.parman
     order=parman.order
@@ -66,6 +67,7 @@ def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
     obsres={}
     if 'idis'     in conf['datasets'] : obsres['idis']     = resman.idis_res
     if 'pidis'    in conf['datasets'] : obsres['pidis']    = resman.pidis_res
+    if 'SU23'     in conf['datasets'] : obsres['SU23']     = resman.SU23_res
     if 'sidis'    in conf['datasets'] : obsres['sidis']    = resman.sidis_res
     if 'psidis'   in conf['datasets'] : obsres['psidis']   = resman.psidis_res
     if 'dy'       in conf['datasets'] : obsres['dy']       = resman.dy_res
@@ -96,8 +98,8 @@ def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
         for idx in tabs:
             tabs[idx]['prediction-rep']=[]
             tabs[idx]['residuals-rep']=[]
+            tabs[idx]['shift-rep']=[]
         data['reactions'][_]=tabs
-      
 
     print('\ngen predictions using %s\n'%wdir)
 
@@ -119,6 +121,7 @@ def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
                     for idx in data['reactions'][_]:
                         data['reactions'][_][idx]['prediction-rep'].append(done['reactions'][_][idx]['prediction-rep'][dcnt])
                         data['reactions'][_][idx]['residuals-rep'].append(done['reactions'][_][idx]['residuals-rep'][dcnt])
+                        data['reactions'][_][idx]['shift-rep'].append(done['reactions'][_][idx]['shift-rep'][dcnt])
                 dcnt+=1
                 cnt+=1
                 continue
@@ -138,10 +141,12 @@ def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
         #--save predictions of the current step and current replica at data
         for _ in obsres:
             for idx in data['reactions'][_]:
-                prediction=copy.copy(obsres[_].tabs[idx]['prediction'])
-                residuals=copy.copy(obsres[_].tabs[idx]['residuals'])
+                prediction= copy.copy(obsres[_].tabs[idx]['prediction'])
+                residuals = copy.copy(obsres[_].tabs[idx]['residuals'])
+                shift     = copy.copy(obsres[_].tabs[idx]['shift'])
                 data['reactions'][_][idx]['prediction-rep'].append(prediction)
                 data['reactions'][_][idx]['residuals-rep'].append(residuals)
+                data['reactions'][_][idx]['shift-rep'].append(shift)
     print 
 
     #--close resman
@@ -150,6 +155,7 @@ def get_predictions(wdir,force=False,ncores=3,mod_conf=None,name=''):
     #--convert tables to numpy array before saving
     for _ in ['res','rres','nres']:
         data[_]=np.array(data[_])
+
 
     checkdir('%s/data'%wdir)
     if mod_conf==None:
@@ -221,9 +227,9 @@ def get_summary(self,wdir,istep):
             summary.append(msg)
         #print tab.keys()
 
-    print 'global summary'
-    print 'chi2/npts =',global_chi2/global_npts
-    print 'npts      =',global_npts
+    print ('global summary')
+    print ('chi2/npts =',global_chi2/global_npts)
+    print ('npts      =',global_npts)
 
     summary=[_+'\n' for _ in summary]
     F=open('%s/data/summary-%d.txt'%(wdir,istep),'w')
