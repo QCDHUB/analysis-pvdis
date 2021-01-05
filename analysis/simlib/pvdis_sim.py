@@ -5,8 +5,10 @@ matplotlib.use('Agg')
 import pylab  as py
 import pandas as pd
 import numpy as np
-from subprocess import Popen, PIPE
 from scipy.integrate import quad
+
+import numpy
+import pandas
 
 try: import lhapdf
 except: pass
@@ -32,13 +34,13 @@ from qcdlib.aux import AUX
 from qcdlib.alphaS import ALPHAS
 from qcdlib.eweak import EWEAK
 
-def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',lum=None,force=True):
+def pvdis(wdir,kind='e',tar='p',est='mod',central='mean',lum=None,force=True):
 
     #--generate initial data file
-    gen_pvdis_xlsx(wdir,kind,tar,est,obs,lum)
+    gen_pvdis_xlsx(wdir,kind,tar,est,central,lum)
 
     #--modify conf with new data file
-    conf = gen_conf(wdir,kind,tar,est,obs)
+    conf = gen_conf(wdir,kind,tar,est,central)
 
     #--get predictions on new data file if not already done
     print('Generating predictions...')
@@ -46,18 +48,25 @@ def pvdis(wdir,kind='e',tar='p',est='opt',obs='mean',lum=None,force=True):
     predict.get_predictions(wdir,force=force,mod_conf=conf,name=name)
 
     #--update tables
-    update_tabs(wdir,kind,tar,est,obs)
+    update_tabs(wdir,kind,tar,est,central)
 
     #--plot errors
-    plot_errors(wdir,kind,tar,est,obs)
+    plot_errors(wdir,kind,tar,est,central)
+
+    #--smooth the observable
+    if central=='min' or central=='max':
+        smooth(wdir,kind,tar,est,central)
 
     #--generate lhapdf info and data files
-    if obs=='mean':
-        gen_lhapdf_info_file(wdir,kind,tar,est,obs)
-        gen_lhapdf_dat_file (wdir,kind,tar,est,obs)
+    if central=='mean':
+        try:
+            gen_lhapdf_info_file(wdir,kind,tar,est,central)
+            gen_lhapdf_dat_file (wdir,kind,tar,est,central)
+        except:
+            print('Could not load lhapdf')
 
 #--generate pseudo-data
-def gen_pvdis_xlsx(wdir,kind,tar,est,_obs,lum):
+def gen_pvdis_xlsx(wdir,kind,tar,est,central,lum):
 
     checkdir('%s/sim'%wdir)
 
@@ -95,11 +104,11 @@ def gen_pvdis_xlsx(wdir,kind,tar,est,_obs,lum):
         if lum!=None: data['lum'].append(lum)
 
     df=pd.DataFrame(data)
-    filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,_obs)
+    filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central)
     df.to_excel(filename, index=False)
     print('Generating xlsx file and saving to %s'%filename)
 
-def gen_conf(wdir,kind,tar,est,obs):
+def gen_conf(wdir,kind,tar,est,central):
 
     print('Modifying config with new experimental data file...')
 
@@ -113,7 +122,7 @@ def gen_conf(wdir,kind,tar,est,obs):
 
     #--placeholder index
     idx = 90000
-    conf['datasets'][exp]['xlsx'][idx]='./%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs)
+    conf['datasets'][exp]['xlsx'][idx]='./%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central)
     conf['steps'][istep]['datasets'][exp].append(idx)
 
     fn   = [conf['datasets'][exp]['xlsx'][idx]]
@@ -134,7 +143,7 @@ def gen_conf(wdir,kind,tar,est,obs):
 
     return conf
 
-def update_tabs(wdir,kind,tar,est,obs):
+def update_tabs(wdir,kind,tar,est,central):
 
     istep=core.get_istep()
     data=load('%s/data/predictions-%d-pvdis-%s-%s.dat'%(wdir,istep,kind,tar))
@@ -165,27 +174,28 @@ def update_tabs(wdir,kind,tar,est,obs):
         except: continue
 
     #--save mean value
-    if obs=='mean': tab['value'] = np.mean(tab['prediction-rep'],axis=0)
+    if central=='mean': tab['value'] = np.mean(tab['prediction-rep'],axis=0)
 
     #--adjust to +-1 sigma of mean value
-    if obs=='min':  tab['value'] = np.mean(tab['prediction-rep'],axis=0) - np.std(tab['prediction-rep'],axis=0)
-    if obs=='max':  tab['value'] = np.mean(tab['prediction-rep'],axis=0) + np.std(tab['prediction-rep'],axis=0)
+    if central=='min':  tab['value'] = np.mean(tab['prediction-rep'],axis=0) - np.std(tab['prediction-rep'],axis=0)
+    if central=='max':  tab['value'] = np.mean(tab['prediction-rep'],axis=0) + np.std(tab['prediction-rep'],axis=0)
 
     #--save individual values
     for i in range(len(tab['prediction-rep'])):
         tab['value%s'%(i+1)] = tab['prediction-rep'][i]
 
     del tab['prediction-rep']
+    del tab['shift-rep']
 
-    if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,obs,tab['value'])
-    if kind == 'had': tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_had_errors(wdir,kind,tar,est,obs,tab['value'])
+    if kind == 'e':   tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_e_errors  (wdir,kind,tar,est,central,tab['value'])
+    if kind == 'had': tab['stat_u'],tab['syst_u'],tab['norm_c'] = A_PV_had_errors(wdir,kind,tar,est,central,tab['value'])
 
     df=pd.DataFrame(tab)
-    filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs)
+    filename = '%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central)
     df.to_excel(filename, index=False)
     print('Updating xlsx file and saving to %s'%filename)
 
-def A_PV_e_errors(wdir,kind,tar,est,obs,value):
+def A_PV_e_errors(wdir,kind,tar,est,central,value):
 
     conf['aux'] = AUX()
     conf['eweak'] = EWEAK()
@@ -305,11 +315,11 @@ def A_PV_e_errors(wdir,kind,tar,est,obs,value):
 
     return data['stat_u'],data['syst_u'],data['norm_c']
 
-def A_PV_had_errors(wdir,kind,tar,est,obs,value):
+def A_PV_had_errors(wdir,kind,tar,est,central,value):
 
     conf['aux'] = AUX()
     conf['eweak'] = EWEAK()
-    data = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs), index=False)
+    data = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central), index=False)
     data = data.to_dict(orient='list')
     target=data['target'][0]
     l    = len(data['value'])
@@ -377,16 +387,19 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     resman=RESMAN(parallel=False,datasets=False)
     parman = resman.parman
     resman.setup_idis()
-    idis  = resman.idis_thy
+    resman.setup_pidis()
+    idis   = resman.idis_thy
+    pidis  = resman.pidis_thy
     idis.data [tar]['F2']  = np.zeros(idis.X.size)
     idis.data [tar]['FL']  = np.zeros(idis.X.size)
+    pidis.data[tar]['g1']  = np.zeros(pidis.X.size)
     if tar=='d' or tar=='h':
         idis.data ['p']['F2']  = np.zeros(idis.X.size)
         idis.data ['p']['FL']  = np.zeros(idis.X.size)
         idis.data ['n']['F2']  = np.zeros(idis.X.size)
         idis.data ['n']['FL']  = np.zeros(idis.X.size)
-
-    idis   = resman.idis_thy
+        pidis.data['p']['g1']  = np.zeros(pidis.X.size)
+        pidis.data['n']['g1']  = np.zeros(pidis.X.size)
 
     #--get average over replicas
     istep = sorted(conf['steps'])[-1]
@@ -394,27 +407,55 @@ def A_PV_had_errors(wdir,kind,tar,est,obs,value):
     parman.order = jar['order']
     replicas = jar['replicas']
  
-    N = 0 
+    NR_temp,NL_temp = [],[]
     for i in range(len(replicas)):
         lprint('Generating stastical errors: %s/%s'%(i+1,len(replicas)))
         par = replicas[i]
         parman.set_new_params(par,initial=True)
         idis._update()
+        pidis._update()
         F2  = idis .get_stf(X,Q2,stf='F2'  ,tar=tar) 
         FL  = idis .get_stf(X,Q2,stf='FL'  ,tar=tar)
+        g1  = pidis.get_stf(X,Q2,stf='g1'  ,tar=tar)
         F1  = (F2-FL)/(2*X) 
 
         C1 = 8*np.pi*alpha**2/(X**2*Q2*S)
 
         T1 = X*y*F1 +(1-y)/y*F2
 
-        n  = lum*C1*T1*bins
+        T1 = X*y*F1
+        T2 = (1-y)/y*F2
 
-        N += n/len(replicas)
+        T3 = X*(2-y)*g1
+
+        sigR = C1*(T1+T2-T3)
+        sigL = C1*(T1+T2+T3)
+
+        nr = lum*sigR*bins
+        nl = lum*sigL*bins
+
+        NR_temp.append(nr)
+        NL_temp.append(nl)
+
+
+    print()
+    if central=='mean': 
+        NR = np.mean(NR_temp,axis=0)
+        NL = np.mean(NL_temp,axis=0)
+    if central=='min':  
+        NR = np.mean(NR_temp,axis=0) - np.std(NR_temp,axis=0)
+        NL = np.mean(NL_temp,axis=0) - np.std(NL_temp,axis=0)
+    if central=='max':  
+        NR = np.mean(NR_temp,axis=0) + np.std(NR_temp,axis=0)
+        NL = np.mean(NL_temp,axis=0) + np.std(NL_temp,axis=0)
+
+
+    N = NR + NL
 
     #--theory asymmetry
     A = np.array(value)
-    stat2 = np.abs((1 + A**2)/N)
+    #stat2 = np.abs((1 + A**2)/N)
+    stat2 = np.abs(1/N)
     stat = np.sqrt(stat2)
 
     #--statistical uncertainties
@@ -437,13 +478,13 @@ def convert_lum(lum):
     if units=='fb-1':   return lum*one*1e12
     else:               sys.exit('units not convertible!')
 
-def plot_errors(wdir,kind,tar,est,obs):
+def plot_errors(wdir,kind,tar,est,central):
 
     nrows,ncols=1,1
     fig = py.figure(figsize=(ncols*9.1,nrows*5.2))
     ax11=py.subplot(nrows,ncols,1)
 
-    tab   = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs))
+    tab   = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central))
     tab   = tab.to_dict(orient='list')
     X     = np.array(tab['X'])
     value = np.array(tab['value'])
@@ -492,13 +533,13 @@ def plot_errors(wdir,kind,tar,est,obs):
     ax11.legend(handles,labels,loc='upper left', fontsize = 20, frameon = 0, handletextpad = 0.3, handlelength = 1.0)
     py.tight_layout()
     checkdir('%s/gallery'%wdir)
-    filename = '%s/gallery/pvdis-errors-%s-%s-%s-%s'%(wdir,kind,tar,est,obs)
+    filename = '%s/gallery/pvdis-errors-%s-%s-%s-%s'%(wdir,kind,tar,est,central)
     py.savefig(filename)
     print('Saving error plot to %s'%filename)
     py.clf()
 
 #--generate lhapdf info and data files
-def gen_lhapdf_info_file(wdir,kind,tar,est,obs):
+def gen_lhapdf_info_file(wdir,kind,tar,est,central):
 
     info={}
     if kind == 'e':   info['<description>'] = 'PVDIS (electron)'
@@ -509,7 +550,7 @@ def gen_lhapdf_info_file(wdir,kind,tar,est,obs):
     info['<particle>']    = '%s'%tar
 
     #--get tables
-    X,Q2,table,replicas=get_tables(wdir,kind,tar,est,obs)
+    X,Q2,table,replicas=get_tables(wdir,kind,tar,est,central)
 
     #--kinematic limits
     xmin=X[0]
@@ -579,10 +620,10 @@ def gen_lhapdf_info_file(wdir,kind,tar,est,obs):
     tab.close()
     print('Saving lhapdf info file to %s/lhapdf/%s/%s.info'%(wdir,dirname,dirname))
 
-def gen_lhapdf_dat_file(wdir,kind,tar,est,obs):
+def gen_lhapdf_dat_file(wdir,kind,tar,est,central):
 
     #--get tables
-    X,Q2,central,replicas=get_tables(wdir,kind,tar,est,obs)
+    X,Q2,central,replicas=get_tables(wdir,kind,tar,est,central)
     nx=len(X)
     nQ2=len(Q2)
     nrep = len(replicas)
@@ -652,9 +693,9 @@ def gen_lhapdf_dat_file(wdir,kind,tar,est,obs):
 
     print('Saving lhapdf data files inside %s/lhapdf/%s'%(wdir,dirname))
 
-def get_tables(wdir,kind,tar,est,obs):
+def get_tables(wdir,kind,tar,est,central):
     replicas = []
-    tab=pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,obs))
+    tab=pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central))
     tab=tab.to_dict(orient='list')
     central = tab['value']
     _replicas = {}
@@ -670,9 +711,164 @@ def get_tables(wdir,kind,tar,est,obs):
 
     return X,Q2,central,replicas
 
+#--smoothing function
+def smooth(wdir,kind,tar,est,central):
 
+    data = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central), index=False)
+    data = data.to_dict(orient='list')
 
+    mean_data = pd.read_excel('%s/sim/pvdis-%s-%s-%s-mean.xlsx'%(wdir,kind,tar,est), index=False)
+    mean_data = mean_data.to_dict(orient='list')
 
+    print('Smoothing %s values...'%central)
+
+    #--smoothing function
+    l = 0.01125
+    p = 3.0
+    func = lambda x: numpy.exp(- (xs / l) ** p)
+  
+    xs = np.array(mean_data['X'])
+    val_mean    = np.array(mean_data['value'])
+    norm_c_mean = np.array(mean_data['norm_c'])
+    stat_u_mean = np.array(mean_data['stat_u'])
+    syst_u_mean = np.array(mean_data['syst_u'])
+
+    val    = np.array(data['value'])
+    norm_c = np.array(data['norm_c'])
+    stat_u = np.array(data['stat_u'])
+    syst_u = np.array(data['syst_u'])
+ 
+    val      = (func(xs) * val)      + ((1.0 - func(xs)) * val_mean)
+    norm_c   = (func(xs) * norm_c)   + ((1.0 - func(xs)) * norm_c_mean)
+    stat_u   = (func(xs) * stat_u)   + ((1.0 - func(xs)) * stat_u_mean)
+    syst_u   = (func(xs) * syst_u)   + ((1.0 - func(xs)) * syst_u_mean)
+ 
+    data['value']  = val
+    data['norm_c'] = norm_c
+    data['stat_u'] = stat_u
+    data['syst_u'] = syst_u
+   
+    df=pd.DataFrame(data)
+    filename = '%s/sim/pvdis-%s-%s-%s-%s-smooth.xlsx'%(wdir,kind,tar,est,central)
+    df.to_excel(filename, index=False)
+    print('Smoothing %s xlsx file and saving to %s'%(central,filename))
+ 
+    compare_smooth_plot(wdir,kind,tar,est,central)
+
+def compare_smooth_plot(wdir,kind,tar,est,central):
+    table_mean = pd.read_excel('%s/sim/pvdis-%s-%s-%s-mean.xlsx'%(wdir,kind,tar,est), index=False)
+    table_before = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s.xlsx'%(wdir,kind,tar,est,central), index=False)
+    table_after = pd.read_excel('%s/sim/pvdis-%s-%s-%s-%s-smooth.xlsx'%(wdir,kind,tar,est,central), index=False)
+
+    print('Plotting results after smoothing...')
+
+    tables = {}
+    root_s_s = list(set(table_before['RS'].tolist()))
+    for root_s in root_s_s:
+        print('\troot s is %.2f...' % root_s)
+        p_table_mean   = table_mean[table_mean['RS'] == root_s]
+        p_table_before = table_before[table_before['RS'] == root_s]
+        p_table_after  = table_after[table_after['RS'] == root_s]
+
+        xs_before     = numpy.array(p_table_before['X'])
+        values_before = numpy.array(p_table_before['value'])
+        stat_before   = numpy.abs(numpy.array(p_table_before['stat_u']))
+        syst_before   = numpy.abs(numpy.array(p_table_before['syst_u']))
+        alphas_before = numpy.sqrt(((stat_before ** 2.0) + (syst_before ** 2.0)))
+
+        xs_after     = numpy.array(p_table_after['X'])
+        values_after = numpy.array(p_table_after['value'])
+        stat_after   = numpy.abs(numpy.array(p_table_after['stat_u']))
+        syst_after   = numpy.abs(numpy.array(p_table_after['syst_u']))
+        alphas_after = numpy.sqrt(((stat_after ** 2.0) + (syst_before ** 2.0)))
+
+        xs_mean     = numpy.array(p_table_mean['X'])
+        values_mean = numpy.array(p_table_mean['value'])
+        stat_mean   = numpy.abs(numpy.array(p_table_mean['stat_u']))
+        syst_mean   = numpy.abs(numpy.array(p_table_mean['syst_u']))
+        alphas_mean = numpy.sqrt(((stat_mean ** 2.0) + (syst_before ** 2.0)))
+        Q_2_mean    = numpy.array(p_table_mean['Q2'])
+
+        Q_2_s = sorted(list(set(numpy.array(table_mean['Q2']))))
+
+        xs_before_p, values_before_p, alphas_before_p = {}, {}, {}
+        xs_after_p, values_after_p, alphas_after_p = {}, {}, {}
+        xs_mean_p, values_mean_p, alphas_mean_p = {}, {}, {}
+        for i in range(len(Q_2_s)):
+            xs_before_temp, values_before_temp, alphas_before_temp = [], [], []
+            xs_after_temp, values_after_temp, alphas_after_temp = [], [], []
+            xs_mean_temp, values_mean_temp, alphas_mean_temp = [], [], []
+            for _ in range(len(Q_2_mean)):
+                if Q_2_mean[_] == Q_2_s[i]:
+                    xs_before_temp.append(xs_before[_])
+                    values_before_temp.append(values_before[_])
+                    alphas_before_temp.append(alphas_before[_])
+
+                    xs_after_temp.append(xs_after[_])
+                    values_after_temp.append(values_after[_])
+                    alphas_after_temp.append(alphas_after[_])
+
+                    xs_mean_temp.append(xs_mean[_])
+                    values_mean_temp.append(values_mean[_])
+                    alphas_mean_temp.append(alphas_mean[_])
+            if len(xs_mean_temp) == 0:
+                continue
+            else:
+                xs_before_p[i] = xs_before_temp
+                values_before_p[i] = values_before_temp
+                alphas_before_p[i] = alphas_before_temp
+
+                xs_after_p[i] = xs_after_temp
+                values_after_p[i] = values_after_temp
+                alphas_after_p[i] = alphas_after_temp
+
+                xs_mean_p[i] = xs_mean_temp
+                values_mean_p[i] = values_mean_temp
+                alphas_mean_p[i] = alphas_mean_temp
+
+        n_plots = len(xs_mean_p)
+        if n_plots == 1:
+            n_rows, n_columns = 1, 1
+        elif n_plots == 2:
+            n_rows, n_columns = 2, 1
+        else:
+            n_rows, n_columns = int(numpy.floor(numpy.sqrt(n_plots))), int(numpy.ceil(numpy.sqrt(n_plots)))
+            if (n_rows * n_columns) < n_plots: n_rows += 1
+        figure = py.figure(figsize = (n_columns * 7, n_rows * 4))
+        axs = []
+
+        for i in range(len(Q_2_s)):
+            if i not in xs_mean_p.keys():
+                continue
+            ax = py.subplot(n_rows, n_columns, i + 1)
+            axs.append(ax)
+
+            handle_before = ax.errorbar(0.95 * numpy.array(xs_before_p[i]), values_before_p[i], yerr = alphas_before_p[i], color = 'firebrick', fmt = 'o', markersize = 3.0, capsize = 2.0)
+            handle_after  = ax.errorbar(1.00 * numpy.array(xs_after_p[i]) , values_after_p[i] , yerr = alphas_after_p[i] , color = 'gold'     , fmt = 'o', markersize = 3.0, capsize = 2.0)
+            handle_mean   = ax.errorbar(1.05 * numpy.array(xs_mean_p[i])  , values_mean_p[i]  , yerr = alphas_mean_p[i]  , color = 'green'    , fmt = 'o', markersize = 3.0, capsize = 2.0)
+            ax.semilogx()
+            # ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
+            if int(i / n_columns) == 0:
+                ax.title.set_text(r'$\sqrt{s} = %.2f~\mathrm{GeV},~Q^2 = %.2f~\mathrm{GeV}^2$' % (root_s, Q_2_s[i]))
+            else:
+                ax.title.set_text(r'$Q^2 = %.2f~\mathrm{GeV}^2$' % (Q_2_s[i]))
+            if (i % n_columns) == 0:
+                handles = [handle_before, handle_after, handle_mean]
+                label_1 = r'\textrm{before}'
+                label_2 = r'\textrm{after}'
+                label_3 = r'\textrm{mean}'
+                labels  = [label_1, label_2, label_3]
+                ax.legend(handles, labels, loc = 'best', fontsize = 15, handletextpad = 0.3, handlelength = 1.0)
+
+        i_last_row = range(len(axs) - 1, len(axs) - 1 - n_columns, -1)
+        for i in range(len(axs)):
+            axs[i].tick_params(axis = 'both', which = 'both', right = True, top = True, direction = 'in', labelsize = 17)
+            if i in i_last_row:
+                axs[i].set_xlabel(r'\boldmath$x$', size = 17)
+        py.tight_layout()
+        filename = '%s/gallery/pvdis-%s-%s-%s-%s-smooth-%s.png'%(wdir,kind,tar,est,central,round(root_s,1))
+        py.savefig(filename, dpi = 250)
+        py.close()
 
 
 
