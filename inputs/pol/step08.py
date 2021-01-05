@@ -354,7 +354,7 @@ conf['params']['ppdf']['sea1 d']  = {'value':    0.000000000, 'min':   -10, 'max
 #--steps
 conf['steps']={}
 
-#--starting point, PDIS W2 > 10, Q2 > mc2 (w/ smearing, valence parameterization, OS, SU2+SU3 from JAM17, g2 = 0)
+#--add jets, PDIS W2 > 10, Q2 > mc2 + jets (w/ smearing, valence parameterization, OS, SU2+SU3 from JAM17, g2 = 0)
 conf['ftol'] = 1e-6
 conf['nuc']      = True
 conf['tmc']      = False

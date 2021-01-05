@@ -12,6 +12,7 @@ from analysis.qpdlib import ppdf
 #--from obslib
 from analysis.obslib  import sin2w
 from analysis.obslib  import pvdis
+from analysis.obslib  import kin
 
 #--from parlib
 from analysis.parlib  import params
@@ -77,37 +78,6 @@ nrep = None
 #--mode: 0 for all replicas, 1 for mean and std
 mode = 0
 
-#########################
-##--Simulation for structure functions
-#########################
-tar   = 'h'
-force = False
-
-#stf_sim.stf(wdir,tar=tar,force=force)
-
-#########################
-##--Simulation for PVDIS
-#########################
-#--'e' for polarized electron, 'had' for polarized hadron
-kind  = 'had'
-#--choose target: 'p', 'd', or 'h'
-tar   = 'p'
-#--choose systematic errors (only 'opt' available)
-est   = 'opt'
-#--choose to use mean of replicas (currently no other options)
-obs   = 'mean'
-#--if True, force predictions to be regenerated
-force = False
-#--if None, default to 100fb-1 for proton, 10fb-1 for deuteron and helium.
-#--can choose instead, for example, lum = '500:fb-1'
-lum   = None
-
-FILT = []
-#inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
-pvdis_sim.pvdis(wdir,kind=kind,tar=tar,est=est,obs=obs,lum=lum,force=force)
-
-#pvdis.plot_errors(wdir)
-
 ######################
 ##--Initial Processing
 ######################
@@ -116,12 +86,18 @@ FILT = []
 #FILT.append(('g1 a',-0.5,'less'))
 #FILT.append(('uv1 b', 0.1,'less'))
 #FILT.append(('s2wMZ',0.235,'greater'))
+FILT.append(('ppdf','g1 N',   '<', 0.0))
+FILT.append(('ppdf','uv1 b',  '<', 0.1))
+#FILT.append(('ppdf','dv1 N', '>', 1.5))
 
-#inspect.get_msr_inspected(wdir,limit=1.2,FILT=FILT)
-#predict.get_predictions(wdir,force=False)
-#classifier.gen_labels(wdir,kc)
-#jar.gen_jar_file(wdir,kc)
-#summary.print_summary(wdir,kc)
+inspect.get_msr_inspected(wdir,limit=2.0,FILT=FILT)
+predict.get_predictions(wdir,force=False)
+classifier.gen_labels(wdir,kc)
+jar.gen_jar_file(wdir,kc)
+summary.print_summary(wdir,kc)
+
+
+#kin.plot(wdir,True)
 
 ###################
 ##--Optimize priors
@@ -173,8 +149,8 @@ hist=False
 ########################
 PSETS = []
 
-#ppdf.gen_xf(wdir,Q2=Q2)         
-#ppdf.plot_xf(PLOT,kc,mode=0,name='',PSETS=PSETS)
+ppdf.gen_xf(wdir,Q2=Q2)         
+ppdf.plot_xf(PLOT,kc,mode=0,name='',PSETS=PSETS)
 
 #--moments
 #ppdf.gen_moments(wdir,Q2=Q2)         
@@ -184,7 +160,7 @@ PSETS = []
 ##--Parameter distributions
 ###########################
 
-#params.plot_params(wdir,'ppdf',kc,hist=hist)
+params.plot_params(wdir,'ppdf',kc,hist=hist)
 
 
 
