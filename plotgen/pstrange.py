@@ -11,8 +11,8 @@ from analysis.corelib import core, inspect, predict, classifier, optpriors, jar,
 #--from qpdlib
 from analysis.qpdlib import ppdf
 
-wdir  = 'results/pidis0'
-wdir2 = 'results/pidis1'
+wdir  = 'results/pidis0new'
+wdir2 = 'results/pidis1new'
 
 
 ####################
@@ -61,7 +61,7 @@ ax12.set_xticks([1e-3,1e-2,1e-1])
 py.tight_layout()
 py.subplots_adjust(wspace=0)
 
-filename = '%s/gallery/ppdfs-combined'%PLOT[0][0]
+filename = '%s/gallery/ppdfs-combined-new'%PLOT[0][0]
 filename += '.png'
 print('Saving figures to %s'%filename)
 py.savefig(filename)

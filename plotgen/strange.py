@@ -56,8 +56,8 @@ if wdir3 != None: PLOT.append((wdir3,Q23,color3,ls3,label3,alpha3))
 Q2 = Q21
 
 #--name to append at end of file
-name = ''
-#name = '-LHC-compare'
+#name = ''
+name = '-combined-'
 
 #--maximum number of replicas to plot
 nrep = None
