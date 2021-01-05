@@ -235,22 +235,22 @@ def A_PV_e_errors(wdir,kind,tar,est,central,value):
     if est=='mod':
         for i in range(len(X)):
             if El[i] == 5:
-                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.000001
-                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.1
-                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*5
-                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+                if eta[i] < -2.0:                      data['syst_u'][i] = np.abs(A[i]*0.000001)
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = np.abs(A[i]*0.1)
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = np.abs(A[i]*5)
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = np.abs(A[i]*10)
             elif El[i] == 10:
-                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
-                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.4
-                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*8
-                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+                if eta[i] < -2.0:                      data['syst_u'][i] = np.abs(A[i]*0.001)
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = np.abs(A[i]*0.4)
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = np.abs(A[i]*8)
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = np.abs(A[i]*10)
             elif El[i] == 18:
-                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
-                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.8
-                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*10
-                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*1
+                if eta[i] < -2.0:                      data['syst_u'][i] = np.abs(A[i]*0.02)
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = np.abs(A[i]*0.8)
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = np.abs(A[i]*10)
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = np.abs(A[i]*1)
     if est=='opt':
-        data['syst_u'] = A*0.01
+        data['syst_u'] = np.abs(A*0.01)
 
     #--kinematic variables
     rho2 = 1 + 4*X**2*M2/Q2
@@ -310,7 +310,7 @@ def A_PV_e_errors(wdir,kind,tar,est,central,value):
     Q2det = 0.002  #Q2 determination
     recon = 0.002  #reconstruction error
     DAQ   = 0.0015 #DAQ pile up and dead time
-    data['norm_c'] = np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A
+    data['norm_c'] = np.abs(np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A)
 
 
     return data['stat_u'],data['syst_u'],data['norm_c']
@@ -356,22 +356,22 @@ def A_PV_had_errors(wdir,kind,tar,est,central,value):
     if est=='mod':
         for i in range(len(X)):
             if El[i] == 5:
-                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.000001
-                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.1
-                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*5
-                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+                if eta[i] < -2.0:                      data['syst_u'][i] = np.abs(A[i]*0.000001)
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = np.abs(A[i]*0.1)
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = np.abs(A[i]*5)
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = np.abs(A[i]*10)
             elif El[i] == 10:
-                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.001
-                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.4
-                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*8
-                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*10
+                if eta[i] < -2.0:                      data['syst_u'][i] = np.abs(A[i]*0.001)
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = np.abs(A[i]*0.4)
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = np.abs(A[i]*8)
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = np.abs(A[i]*10)
             elif El[i] == 18:
-                if eta[i] < -2.0:                      data['syst_u'][i] = A[i]*0.02
-                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = A[i]*0.8
-                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = A[i]*10
-                elif eta[i] >= 0.0:                    data['syst_u'][i] = A[i]*1
+                if eta[i] < -2.0:                      data['syst_u'][i] = np.abs(A[i]*0.02)
+                elif eta[i] >= -2.0 and eta[i] < -1.0: data['syst_u'][i] = np.abs(A[i]*0.8)
+                elif eta[i] >= -1.0 and eta[i] <  0.0: data['syst_u'][i] = np.abs(A[i]*10)
+                elif eta[i] >= 0.0:                    data['syst_u'][i] = np.abs(A[i]*1)
     if est=='opt':
-        data['syst_u'] = A*0.01
+        data['syst_u'] = np.abs(A*0.01)
 
     #--kinematic variables
     rho2 = 1 + 4*X**2*M2/Q2
@@ -466,7 +466,7 @@ def A_PV_had_errors(wdir,kind,tar,est,central,value):
     Q2det = 0.002  #Q2 determination
     recon = 0.002  #reconstruction error
     DAQ   = 0.0015 #DAQ pile up and dead time
-    data['norm_c'] = np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A
+    data['norm_c'] = np.abs(np.sqrt(pol**2 + Q2det**2 + recon**2 + DAQ**2)*A)
 
     return data['stat_u'],data['syst_u'],data['norm_c']
 
