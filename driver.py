@@ -13,6 +13,7 @@ from analysis.qpdlib import ppdf
 from analysis.obslib  import sin2w
 from analysis.obslib  import pvdis
 from analysis.obslib  import kin
+from analysis.obslib  import SU23
 
 #--from parlib
 from analysis.parlib  import params
@@ -138,6 +139,8 @@ hist=False
 #pvdis.compare(PLOT,kc,'e','p')
 #pvdis.compare(PLOT,kc,'e','d')
 #pvdis.compare(PLOT,kc,'had','p')
+
+SU23.plot_obs(wdir,kc)
 
 ##---------------------------------------------------------------
 ##--Polarized
