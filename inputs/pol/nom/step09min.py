@@ -123,6 +123,10 @@ conf['datasets']['pidis']['xlsx'][10019]='pidis/expdata/10019.xlsx' # 10019 | he
 conf['datasets']['pidis']['xlsx'][10024]='pidis/expdata/10024.xlsx' # 10024 | helium   | Ape  | SLAC(E154)      |          |
 conf['datasets']['pidis']['xlsx'][10025]='pidis/expdata/10025.xlsx' # 10025 | helium   | Apa  | SLAC(E154)      |          |
 #---------------------------------------------------------------------------------------------------------------------------
+conf['datasets']['pidis']['xlsx'][90001]='./results/pol/step08filt/sim/pvdis-had-p-mod-mean.xlsx'       # JAM4EIC | proton | moderate | mean
+conf['datasets']['pidis']['xlsx'][90002]='./results/pol/step08filt/sim/pvdis-had-p-mod-min-smooth.xlsx' # JAM4EIC | proton | moderate | min
+conf['datasets']['pidis']['xlsx'][90003]='./results/pol/step08filt/sim/pvdis-had-p-mod-max-smooth.xlsx' # JAM4EIC | proton | moderate | max
+#---------------------------------------------------------------------------------------------------------------------------
 conf['datasets']['pidis']['norm'][10002]={'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
 conf['datasets']['pidis']['norm'][10003]={'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
 conf['datasets']['pidis']['norm'][10004]={'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
@@ -354,7 +358,7 @@ conf['params']['ppdf']['sea1 d']  = {'value':    0.000000000, 'min':   -10, 'max
 #--steps
 conf['steps']={}
 
-#--add jets, PDIS W2 > 10, Q2 > mc2 + jets (w/ smearing, valence parameterization, OS, SU2+SU3 from JAM17, g2 = 0)
+#--add EIC PVDIS mean data, PDIS W2 > 10, Q2 > mc2 + jets (w/ smearing, valence parameterization, OS, SU2+SU3 from JAM17, g2 = 0)
 conf['ftol'] = 1e-6
 conf['nuc']      = True
 conf['tmc']      = False
@@ -367,53 +371,54 @@ conf['pidis ht']       = False
 conf['pidis ht type']  = 'add'
 conf['pidis offshell'] = False
 conf['ww']  = False
-conf['steps'][8]={}
-conf['steps'][8]['dep']=[6,7]
-conf['steps'][8]['active distributions']=['ppdf']
-conf['steps'][8]['passive distributions']=['pdf']
-conf['steps'][8]['datasets']={}
+conf['steps'][9]={}
+conf['steps'][9]['dep']=[6,8]
+conf['steps'][9]['active distributions']=['ppdf']
+conf['steps'][9]['passive distributions']=['pdf']
+conf['steps'][9]['datasets']={}
 #----------------------------------------------------------------------------------------------------------
-conf['steps'][8]['datasets']['pidis']=[]
-conf['steps'][8]['datasets']['pidis'].append(10002) # 10002 | proton   | A1   | COMPASS         |          |
-conf['steps'][8]['datasets']['pidis'].append(10003) # 10003 | proton   | A1   | COMPASS         |          |
-conf['steps'][8]['datasets']['pidis'].append(10004) # 10004 | proton   | A1   | EMC             |          |
-conf['steps'][8]['datasets']['pidis'].append(10007) # 10007 | proton   | Apa  | HERMES          |          |
-conf['steps'][8]['datasets']['pidis'].append(10022) # 10022 | proton   | Apa  | SLAC(E143)      |          |
-conf['steps'][8]['datasets']['pidis'].append(10029) # 10029 | proton   | Apa  | SLAC(E155)      |          |
-conf['steps'][8]['datasets']['pidis'].append(10032) # 10032 | proton   | Apa  | SLACE80E130     |          |
-conf['steps'][8]['datasets']['pidis'].append(10035) # 10035 | proton   | A1   | SMC             |          |
-conf['steps'][8]['datasets']['pidis'].append(10036) # 10036 | proton   | A1   | SMC             |          |
-conf['steps'][8]['datasets']['pidis'].append(10005) # 10005 | neutron  | A1   | HERMES          |          |
-conf['steps'][8]['datasets']['pidis'].append(10001) # 10001 | deuteron | A1   | COMPASS         |          |
-conf['steps'][8]['datasets']['pidis'].append(10006) # 10006 | deuteron | Apa  | HERMES          |          |
-conf['steps'][8]['datasets']['pidis'].append(10021) # 10021 | deuteron | Apa  | SLAC(E143)      |          |
-conf['steps'][8]['datasets']['pidis'].append(10027) # 10027 | deuteron | Apa  | SLAC(E155)      |          |
-conf['steps'][8]['datasets']['pidis'].append(10033) # 10033 | deuteron | A1   | SMC             |          |
-conf['steps'][8]['datasets']['pidis'].append(10034) # 10034 | deuteron | A1   | SMC             |          |
-conf['steps'][8]['datasets']['pidis'].append(10016) # 10016 | deuteron | Apa  | JLabHB(EG1DVCS) |          |
-conf['steps'][8]['datasets']['pidis'].append(10017) # 10017 | proton   | Apa  | JLabHB(EG1DVCS) |          |
-conf['steps'][8]['datasets']['pidis'].append(10037) # 10037 | deuteron | Apa  | JLabHB(EG1b)    | E =1 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10038) # 10038 | deuteron | Apa  | JLabHB(EG1b)    | E =2 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10039) # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10040) # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10041) # 10041 | proton   | Apa  | JLabHB(EG1b)    | E =1 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10042) # 10042 | proton   | Apa  | JLabHB(EG1b)    | E =2 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10043) # 10043 | proton   | Apa  | JLabHB(EG1b)    | E =4 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10044) # 10044 | proton   | Apa  | JLabHB(EG1b)    | E =5 GeV |
-conf['steps'][8]['datasets']['pidis'].append(10010) # 10010 | helium   | Apa  | JLabHA(E06-014) |          |
-conf['steps'][8]['datasets']['pidis'].append(10014) # 10014 | helium   | Apa  | JLabHA(E99-117) |          |
-conf['steps'][8]['datasets']['pidis'].append(10018) # 10018 | helium   | A1   | SLAC(E142)      |          |
-conf['steps'][8]['datasets']['pidis'].append(10025) # 10025 | helium   | Apa  | SLAC(E154)      |          |
-conf['steps'][8]['datasets']['SU23']=[]
-conf['steps'][8]['datasets']['SU23'].append(20001) # SU2 | JAM17 
-conf['steps'][8]['datasets']['SU23'].append(20002) # SU3 | JAM17 
-conf['steps'][8]['datasets']['pjet'] = []
-conf['steps'][8]['datasets']['pjet'].append(20001) ## STAR 2006 paper on 2003 and 2004 data
-conf['steps'][8]['datasets']['pjet'].append(20002) ## STAR 2012 paper on 2005 data
-conf['steps'][8]['datasets']['pjet'].append(20003) ## STAR 2012 paper on 2006 data
-conf['steps'][8]['datasets']['pjet'].append(20004) ## STAR 2015 paper on 2009 data
-conf['steps'][8]['datasets']['pjet'].append(20005) ## PHENIX 2011 paper on 2005 data
-conf['steps'][8]['datasets']['pjet'].append(20006) ## STAR 2019 paper on 2012 data
+conf['steps'][9]['datasets']['pidis']=[]
+conf['steps'][9]['datasets']['pidis'].append(10002) # 10002 | proton   | A1   | COMPASS         |          |
+conf['steps'][9]['datasets']['pidis'].append(10003) # 10003 | proton   | A1   | COMPASS         |          |
+conf['steps'][9]['datasets']['pidis'].append(10004) # 10004 | proton   | A1   | EMC             |          |
+conf['steps'][9]['datasets']['pidis'].append(10007) # 10007 | proton   | Apa  | HERMES          |          |
+conf['steps'][9]['datasets']['pidis'].append(10022) # 10022 | proton   | Apa  | SLAC(E143)      |          |
+conf['steps'][9]['datasets']['pidis'].append(10029) # 10029 | proton   | Apa  | SLAC(E155)      |          |
+conf['steps'][9]['datasets']['pidis'].append(10032) # 10032 | proton   | Apa  | SLACE80E130     |          |
+conf['steps'][9]['datasets']['pidis'].append(10035) # 10035 | proton   | A1   | SMC             |          |
+conf['steps'][9]['datasets']['pidis'].append(10036) # 10036 | proton   | A1   | SMC             |          |
+conf['steps'][9]['datasets']['pidis'].append(10005) # 10005 | neutron  | A1   | HERMES          |          |
+conf['steps'][9]['datasets']['pidis'].append(10001) # 10001 | deuteron | A1   | COMPASS         |          |
+conf['steps'][9]['datasets']['pidis'].append(10006) # 10006 | deuteron | Apa  | HERMES          |          |
+conf['steps'][9]['datasets']['pidis'].append(10021) # 10021 | deuteron | Apa  | SLAC(E143)      |          |
+conf['steps'][9]['datasets']['pidis'].append(10027) # 10027 | deuteron | Apa  | SLAC(E155)      |          |
+conf['steps'][9]['datasets']['pidis'].append(10033) # 10033 | deuteron | A1   | SMC             |          |
+conf['steps'][9]['datasets']['pidis'].append(10034) # 10034 | deuteron | A1   | SMC             |          |
+conf['steps'][9]['datasets']['pidis'].append(10016) # 10016 | deuteron | Apa  | JLabHB(EG1DVCS) |          |
+conf['steps'][9]['datasets']['pidis'].append(10017) # 10017 | proton   | Apa  | JLabHB(EG1DVCS) |          |
+conf['steps'][9]['datasets']['pidis'].append(10037) # 10037 | deuteron | Apa  | JLabHB(EG1b)    | E =1 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10038) # 10038 | deuteron | Apa  | JLabHB(EG1b)    | E =2 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10039) # 10039 | deuteron | Apa  | JLabHB(EG1b)    | E =4 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10040) # 10040 | deuteron | Apa  | JLabHB(EG1b)    | E =5 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10041) # 10041 | proton   | Apa  | JLabHB(EG1b)    | E =1 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10042) # 10042 | proton   | Apa  | JLabHB(EG1b)    | E =2 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10043) # 10043 | proton   | Apa  | JLabHB(EG1b)    | E =4 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10044) # 10044 | proton   | Apa  | JLabHB(EG1b)    | E =5 GeV |
+conf['steps'][9]['datasets']['pidis'].append(10010) # 10010 | helium   | Apa  | JLabHA(E06-014) |          |
+conf['steps'][9]['datasets']['pidis'].append(10014) # 10014 | helium   | Apa  | JLabHA(E99-117) |          |
+conf['steps'][9]['datasets']['pidis'].append(10018) # 10018 | helium   | A1   | SLAC(E142)      |          |
+conf['steps'][9]['datasets']['pidis'].append(10025) # 10025 | helium   | Apa  | SLAC(E154)      |          |
+conf['steps'][9]['datasets']['pidis'].append(90002) # JAM4EIC | proton | moderate | min
+conf['steps'][9]['datasets']['SU23']=[]
+conf['steps'][9]['datasets']['SU23'].append(10001) # SU2 | nominal 
+conf['steps'][9]['datasets']['SU23'].append(10002) # SU3 | nominal 
+conf['steps'][9]['datasets']['pjet'] = []
+conf['steps'][9]['datasets']['pjet'].append(20001) ## STAR 2006 paper on 2003 and 2004 data
+conf['steps'][9]['datasets']['pjet'].append(20002) ## STAR 2012 paper on 2005 data
+conf['steps'][9]['datasets']['pjet'].append(20003) ## STAR 2012 paper on 2006 data
+conf['steps'][9]['datasets']['pjet'].append(20004) ## STAR 2015 paper on 2009 data
+conf['steps'][9]['datasets']['pjet'].append(20005) ## PHENIX 2011 paper on 2005 data
+conf['steps'][9]['datasets']['pjet'].append(20006) ## STAR 2019 paper on 2012 data
 
 
 

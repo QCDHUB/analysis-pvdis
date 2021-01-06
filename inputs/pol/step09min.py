@@ -410,8 +410,8 @@ conf['steps'][9]['datasets']['pidis'].append(10018) # 10018 | helium   | A1   | 
 conf['steps'][9]['datasets']['pidis'].append(10025) # 10025 | helium   | Apa  | SLAC(E154)      |          |
 conf['steps'][9]['datasets']['pidis'].append(90002) # JAM4EIC | proton | moderate | min
 conf['steps'][9]['datasets']['SU23']=[]
-conf['steps'][9]['datasets']['SU23'].append(10001) # SU2 | JAM17 
-conf['steps'][9]['datasets']['SU23'].append(10002) # SU3 | JAM17 
+conf['steps'][9]['datasets']['SU23'].append(20001) # SU2 | JAM17 
+conf['steps'][9]['datasets']['SU23'].append(20002) # SU3 | JAM17 
 conf['steps'][9]['datasets']['pjet'] = []
 conf['steps'][9]['datasets']['pjet'].append(20001) ## STAR 2006 paper on 2003 and 2004 data
 conf['steps'][9]['datasets']['pjet'].append(20002) ## STAR 2012 paper on 2005 data

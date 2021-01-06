@@ -405,7 +405,7 @@ conf['steps'][7]['datasets']['pidis'].append(10014) # 10014 | helium   | Apa  | 
 conf['steps'][7]['datasets']['pidis'].append(10018) # 10018 | helium   | A1   | SLAC(E142)      |          |
 conf['steps'][7]['datasets']['pidis'].append(10025) # 10025 | helium   | Apa  | SLAC(E154)      |          |
 conf['steps'][7]['datasets']['SU23']=[]
-conf['steps'][7]['datasets']['SU23'].append(10001) # SU2 | JAM17 
-conf['steps'][7]['datasets']['SU23'].append(10002) # SU3 | JAM17 
+conf['steps'][7]['datasets']['SU23'].append(20001) # SU2 | JAM17 
+conf['steps'][7]['datasets']['SU23'].append(20002) # SU3 | JAM17 
 
 

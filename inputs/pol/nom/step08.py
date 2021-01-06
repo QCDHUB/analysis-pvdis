@@ -354,7 +354,7 @@ conf['params']['ppdf']['sea1 d']  = {'value':    0.000000000, 'min':   -10, 'max
 #--steps
 conf['steps']={}
 
-#--add jets, PDIS W2 > 10, Q2 > mc2 + jets (w/ smearing, valence parameterization, OS, SU2+SU3 from JAM17, g2 = 0)
+#--add jets, PDIS W2 > 10, Q2 > mc2 + jets (w/ smearing, valence parameterization, OS, SU2+SU3 from nominal, g2 = 0)
 conf['ftol'] = 1e-6
 conf['nuc']      = True
 conf['tmc']      = False
@@ -405,8 +405,8 @@ conf['steps'][8]['datasets']['pidis'].append(10014) # 10014 | helium   | Apa  | 
 conf['steps'][8]['datasets']['pidis'].append(10018) # 10018 | helium   | A1   | SLAC(E142)      |          |
 conf['steps'][8]['datasets']['pidis'].append(10025) # 10025 | helium   | Apa  | SLAC(E154)      |          |
 conf['steps'][8]['datasets']['SU23']=[]
-conf['steps'][8]['datasets']['SU23'].append(20001) # SU2 | JAM17 
-conf['steps'][8]['datasets']['SU23'].append(20002) # SU3 | JAM17 
+conf['steps'][8]['datasets']['SU23'].append(10001) # SU2 | nominal 
+conf['steps'][8]['datasets']['SU23'].append(10002) # SU3 | nominal 
 conf['steps'][8]['datasets']['pjet'] = []
 conf['steps'][8]['datasets']['pjet'].append(20001) ## STAR 2006 paper on 2003 and 2004 data
 conf['steps'][8]['datasets']['pjet'].append(20002) ## STAR 2012 paper on 2005 data
