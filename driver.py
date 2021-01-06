@@ -86,8 +86,8 @@ FILT = []
 #FILT.append(('g1 a',-0.5,'less'))
 #FILT.append(('uv1 b', 0.1,'less'))
 #FILT.append(('s2wMZ',0.235,'greater'))
-FILT.append(('ppdf','g1 N',   '<', 0.0))
-FILT.append(('ppdf','uv1 b',  '<', 0.1))
+#FILT.append(('ppdf','g1 N',   '<', 0.0))
+#FILT.append(('ppdf','uv1 b',  '<', 0.1))
 #FILT.append(('ppdf','dv1 N', '>', 1.5))
 
 inspect.get_msr_inspected(wdir,limit=2.0,FILT=FILT)

@@ -123,9 +123,9 @@ conf['datasets']['pidis']['xlsx'][10019]='pidis/expdata/10019.xlsx' # 10019 | he
 conf['datasets']['pidis']['xlsx'][10024]='pidis/expdata/10024.xlsx' # 10024 | helium   | Ape  | SLAC(E154)      |          |
 conf['datasets']['pidis']['xlsx'][10025]='pidis/expdata/10025.xlsx' # 10025 | helium   | Apa  | SLAC(E154)      |          |
 #---------------------------------------------------------------------------------------------------------------------------
-conf['datasets']['pidis']['xlsx'][90001]='./results/pol/step08filt/sim/pvdis-had-p-mod-mean.xlsx'       # JAM4EIC | proton | moderate | mean
-conf['datasets']['pidis']['xlsx'][90002]='./results/pol/step08filt/sim/pvdis-had-p-mod-min-smooth.xlsx' # JAM4EIC | proton | moderate | min
-conf['datasets']['pidis']['xlsx'][90003]='./results/pol/step08filt/sim/pvdis-had-p-mod-max-smooth.xlsx' # JAM4EIC | proton | moderate | max
+conf['datasets']['pidis']['xlsx'][90001]='./results/pol/nom/step08filt/sim/pvdis-had-p-mod-mean.xlsx'       # JAM4EIC | proton | moderate | mean
+conf['datasets']['pidis']['xlsx'][90002]='./results/pol/nom/step08filt/sim/pvdis-had-p-mod-min-smooth.xlsx' # JAM4EIC | proton | moderate | min
+conf['datasets']['pidis']['xlsx'][90003]='./results/pol/nom/step08filt/sim/pvdis-had-p-mod-max-smooth.xlsx' # JAM4EIC | proton | moderate | max
 #---------------------------------------------------------------------------------------------------------------------------
 conf['datasets']['pidis']['norm'][10002]={'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
 conf['datasets']['pidis']['norm'][10003]={'value':    1, 'min': 8.00000e-01, 'max': 1.20000e+00, 'fixed': False}
