@@ -41,6 +41,7 @@ def get_norm(wdir,kc):
                 if reaction not in tab: tab[reaction]={}
                 if idx not in tab[reaction]: tab[reaction][idx]=[] 
                 tab[reaction][idx].append(params[i])
+                        
     for reaction in tab:
         for idx in tab[reaction]:
             norm=tab[reaction][idx][:]
@@ -67,12 +68,18 @@ def get_chi2(wdir,kc):
             alpha=data[reaction][idx]['alpha']
             thy=np.mean(data[reaction][idx]['prediction-rep'],axis=0)
             col=data[reaction][idx]['col'][0]
+            if 'target' in            data[reaction][idx]: tar=data[reaction][idx]['target'][0]
+            elif 'tar' in             data[reaction][idx]: tar=data[reaction][idx]['tar'][0]
+            elif 'particles-in' in    data[reaction][idx]: tar=data[reaction][idx]['particles-in'][0]
+            obs=data[reaction][idx]['obs'][0]
             res=(value-thy)/alpha
             chi2=np.sum(res**2)
             npts=res.size
             chi2_npts=chi2/npts
 
             tab[reaction][idx]['col']=col
+            tab[reaction][idx]['tar']=tar
+            tab[reaction][idx]['obs']=obs
             tab[reaction][idx]['chi2']=chi2
             tab[reaction][idx]['npts']=npts
             tab[reaction][idx]['chi2_npts']=chi2_npts
@@ -89,16 +96,20 @@ def print_summary(wdir,kc):
     msg1+='%10s '
     msg1+='%25s '
     msg1+='%5s '
+    msg1+='%20s '
+    msg1+='%5s '
     msg1+='%10s '
     msg1+='%10s '
     msg1+='%10s '
-    msg1=msg1%('prediction','reaction','idx','col','npts','chi2','chi2/npts','norm')
+    msg1=msg1%('prediction','reaction','idx','col','tar','obs','npts','chi2','chi2/npts','norm')
     print(msg1)
     chi2_tot=0
     npts_tot=0
     for reaction in chi2_tab:
         for idx in chi2_tab[reaction]:
             col=chi2_tab[reaction][idx]['col']
+            tar=chi2_tab[reaction][idx]['tar']
+            obs=chi2_tab[reaction][idx]['obs']
             npts=chi2_tab[reaction][idx]['npts']
             chi2=chi2_tab[reaction][idx]['chi2']
             chi2_npts=chi2_tab[reaction][idx]['chi2_npts']
@@ -126,13 +137,15 @@ def print_summary(wdir,kc):
             msg2+='%10s '
             msg2+='%10d '
             msg2+='%25s '
+            msg2+='%5s '
+            msg2+='%20s '
             msg2+='%5d '
             msg2+='%10.2f '
             msg2+='%10.2f '
             if type(norm).__name__=='float64': msg2+='%10.2f '
             if type(norm).__name__=='float': msg2+='%10.2f '
             if type(norm).__name__=='str':   msg2+='%10s '
-            print(msg2%(prediction,reaction,idx,col,npts,chi2,chi2_npts,norm))
+            print(msg2%(prediction,reaction,idx,col,tar,obs,npts,chi2,chi2_npts,norm))
 
     chi2_npts_tot=chi2_tot/npts_tot
 
@@ -141,11 +154,13 @@ def print_summary(wdir,kc):
     msg3+='%10s '
     msg3+='%10s '
     msg3+='%25s '
+    msg3+='%5s '
+    msg3+='%20s '
     msg3+='%5d '
     msg3+='%10.2f '
     msg3+='%10.3f '
     msg3+='%10s'
-    print(msg3%(' ',' ',' ',' ',npts_tot,chi2_tot,chi2_npts_tot,' '))
+    print(msg3%(' ',' ',' ',' ',' ',' ',npts_tot,chi2_tot,chi2_npts_tot,' '))
 
  
 

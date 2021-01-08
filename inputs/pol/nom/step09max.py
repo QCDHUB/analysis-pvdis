@@ -12,6 +12,10 @@ conf['alphaSmode']='backward'
 conf['order'] = 'NLO'
 conf['Q20']   = 1.27**2
 
+conf['pidis grid'] = {}
+conf['pidis grid']['overwrite'] = False
+conf['pidis grid']['xlsx'] =[]
+conf['pidis grid']['xlsx'].append('./results/pol/step08filt/sim/pvdis-had-p-mod-mean.xlsx')
 
 #--datasets
 
